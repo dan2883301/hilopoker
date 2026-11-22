@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="robots" content="noindex, nofollow">
 <meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Omaha Hi/Lo</title>
 <link rel="manifest" href="manifest.webmanifest">
@@ -71,6 +71,7 @@
     font-size:12.5px;font-weight:400;letter-spacing:.04em;color:var(--amber);margin-top:2px}
   /* Blood in the Water: red note under the title, and a banner over the empty board at the deal */
   .topbar h2 .sub.blood{color:#ffdede;background:#780c16;border:1px solid #e8505b;border-radius:999px;padding:1px 10px;width:fit-content;margin-left:auto;margin-right:auto;font-weight:700;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase}
+  .topbar h2 .sub.custname{max-width:min(430px,30vw);margin:2px auto 0;line-height:1.25;white-space:normal}
   .topbar h2 .sub.blood.oil{color:#fff;background:#000;border-color:#b5b5b5}
   .boardwrap{position:relative}
   .blood-banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);white-space:nowrap;pointer-events:none;z-index:3;
@@ -186,6 +187,8 @@
   .card.red{color:var(--red)}
   .card.back{background:repeating-linear-gradient(45deg,#7a2b2b,#7a2b2b 4px,#5e2020 4px,#5e2020 8px);
     border:2px solid var(--cream)}
+  .card.wildc{background:#f3dfa6;box-shadow:0 2px 4px rgba(0,0,0,.5),inset 0 0 0 2px #d9a441}
+  .card.deadjok{filter:grayscale(1);opacity:.55}
   .card.jok{background:#f7e9c8;color:#6b4a2f;font-size:11px;text-align:center;padding:2px;
     font-family:"Hoefler Text",Georgia,"Times New Roman",serif}
   .card.sel{outline:3px solid var(--amber);outline-offset:1px}
@@ -430,6 +433,18 @@
     @media (min-width:840px) and (min-height:390px){ body{--seat-scale:.95} }
     .center{transform:translate(-50%,-50%) scale(.72)}
     .pot-chips{transform:translateX(-50%) scale(.72);transform-origin:bottom center}
+    /* 7-card games (sideways phone): a live opponent's face-down cards overlap each other so the face-up cards get the room and can be wider
+       (folded seats are left as they are) */
+    .seat.stud:not(.me):not(.folded) .hand{container-type:inline-size}
+    .seat.stud:not(.me):not(.folded) .hand .card.back + .card.back{margin-left:-9cqw}
+    /* ...and the middle of the table takes less room: "Pot $121  Bet to match $15" on one line, and the message under it on one line */
+    .felt:has(#seats .seat.stud) .center{width:max-content;max-width:300px}
+    .felt:has(#seats .seat.stud) .center .pot{display:flex;align-items:baseline;justify-content:center;gap:8px}
+    .felt:has(#seats .seat.stud) .center .pot > span{display:inline;margin:0}
+    .felt:has(#seats .seat.stud) #pot-amt{display:flex;align-items:baseline;justify-content:center;flex-wrap:wrap;gap:2px 12px}
+    .felt:has(#seats .seat.stud) #pot-amt .pot-split{margin-top:0}
+    .felt:has(#seats .seat.stud) .center .prompt{margin:3px auto 0;min-height:0;font-size:14px;max-width:230px}
+    .felt:has(#seats .seat.stud) .center .offer{margin-top:4px}
     .mine{position:fixed;left:0;right:0;bottom:0;z-index:20;margin:0;padding:4px 10px calc(4px + env(safe-area-inset-bottom));
       background:#0e1d19;border-top:1px solid #2f5349;display:flex;align-items:center;gap:10px}
     .mine .row{flex:1 1 34%;flex-wrap:nowrap;gap:8px;min-width:0;align-items:center}
@@ -516,6 +531,7 @@
       <option value="bermuda">Bermuda</option>
       <option value="caribbean">Caribbean</option>
       <option value="polish">Polish Poker</option>
+      <option value="polishholdem">Polish Holdem</option>
       <option value="doublestuff">Double Stuff</option>
       <option value="doublerazz">Double Razz</option>
       <option value="random" selected>Random</option>
@@ -567,6 +583,44 @@
         <option value="random" selected>Random</option>
         <option value="parke">Parke's Poker</option>
       </select></div>
+    <div class="field" id="row-parke-names" style="display:none"><label for="f-parke-names">Parke's names</label>
+      <div style="display:inline-block;vertical-align:top;max-width:100%">
+        <textarea id="f-parke-names" rows="3" maxlength="240" autocomplete="off" spellcheck="false" style="width:260px;max-width:100%;box-sizing:border-box"></textarea>
+        <div style="font-size:12px;opacity:.8;margin-top:3px">Separate names with commas or new lines (up to 14 names, 12 letters each). You need at least as many names as computer players. <button class="quiet" id="btn-parke-reset" type="button" style="padding:2px 8px;font-size:12px">Reset list</button></div>
+        <div id="parke-names-msg" style="font-size:12px;margin-top:3px"></div>
+      </div></div>
+  <div class="field" id="row-deal"><label for="f-deal">Dealing</label>
+    <select id="f-deal">
+      <option value="slow" selected>Slow &mdash; half the speed of Normal (default)</option>
+      <option value="normal">Normal &mdash; cards are dealt one at a time</option>
+      <option value="fast">Fast</option>
+      <option value="off">Off &mdash; cards appear at once</option>
+    </select></div>
+
+    <div class="field" id="cg-box" style="display:block;border-top:1px solid #2a443c;margin-top:14px;padding-top:12px">
+      <label style="display:block;margin-bottom:4px"><b>Custom game</b></label>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Start from the closest game, change what is different, and play it. After a hand you can save it to the Game list.</div>
+      <div class="field"><label for="cg-base">Start from</label><select id="cg-base"></select></div>
+      <div class="field cg-comm"><label for="cg-hole">Cards dealt to each player</label><select id="cg-hole"></select></div>
+      <div class="field cg-comm" id="cg-use-row" style="display:block"><label style="display:block;margin-bottom:4px">Cards you may use from your hand (tick all that apply)</label>
+        <div id="cg-use" style="display:flex;gap:18px;font-size:14px"></div></div>
+      <div class="field" id="cg-half-row"><label for="cg-half-a">First half of the pot goes to</label><select id="cg-half-a"></select></div>
+      <div class="field" id="cg-half-row2"><label for="cg-half-b">Second half goes to</label><select id="cg-half-b"></select></div>
+      <div class="field" id="cg-low-row"><label for="cg-low">Low hand</label><select id="cg-low">
+        <option value="any">Any low (no qualifier)</option><option value="9">9 or better</option><option value="8">8 or better</option><option value="7">7 or better</option></select></div>
+      <div class="field cg-comm"><label for="cg-dw1">First discard</label><span style="display:flex;gap:6px;flex:1;max-width:62%"><select id="cg-dw1" style="flex:1;min-width:0"></select><select id="cg-dn1" style="width:92px;min-width:0"></select></span></div>
+      <div class="field cg-comm"><label for="cg-dw2">Second discard</label><span style="display:flex;gap:6px;flex:1;max-width:62%"><select id="cg-dw2" style="flex:1;min-width:0"></select><select id="cg-dn2" style="width:92px;min-width:0"></select></span></div>
+      <div class="field" id="cg-buy-row"><label for="cg-buy">Buy a card ($4, trade one in)</label><select id="cg-buy"></select></div>
+      <div class="field" style="display:block"><label style="display:block;margin-bottom:4px">Wild cards (up to 2)</label>
+        <div id="cg-wild" style="font-size:13px"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">Pick the card. Tick suits to limit it to those suits; no suit ticked = every suit. Special cards name their own suits: suicide king = K&hearts;&#xFE0E;, man with the axe = K&diams;&#xFE0E;, one-eyed jacks = J&spades;&#xFE0E; J&hearts;&#xFE0E; (one-eyed royals add the K&diams;&#xFE0E;), Black Mariah = Q&spades;&#xFE0E;.</div></div>
+      <div class="field"><label for="cg-joker">Joker</label><select id="cg-joker">
+        <option value="normal">Plays as usual (ace / straight / flush)</option><option value="dead">Dead (can&rsquo;t be used for anything)</option></select></div>
+      <div class="field"><label for="cg-name">Name</label>
+        <input id="cg-name" type="text" maxlength="40" autocomplete="off" placeholder="(automatic)"
+               style="background:#1a2c27;color:var(--cream);border:1px solid #3d5b52;border-radius:8px;padding:9px 10px;font:inherit;width:100%;box-sizing:border-box"></div>
+      <div id="cg-saved" style="margin-top:10px"></div>
+    </div>
     <div class="field"><label for="f-cardname">Name on the cards</label>
       <div style="position:relative;display:flex;gap:6px;align-items:center">
         <input id="f-cardname" type="text" maxlength="12" autocomplete="off" placeholder="(blank)"
@@ -590,6 +644,10 @@
       <div class="bk-opt" data-back="circles"><div class="card back bk-tile" data-back="circles"></div><span>Interlocking Circles</span></div>
       <div class="bk-opt" data-back="jets"><div class="card back bk-tile" data-back="jets"></div><span>Blue Angels</span></div>
     </div>
+    <div id="cg-play-wrap" style="margin-top:12px">
+      <div id="cg-msg" style="display:none;color:#e57373;font-size:13px;margin:4px 0"></div>
+      <button type="button" class="primary" id="cg-play" style="width:100%">Play this custom game</button>
+    </div>
   </div>
   <p class="blurb" id="setup-blurb"></p>
 </div>
@@ -601,7 +659,7 @@
       <button id="btn-last" class="quiet" type="button">Last hand</button>
       <button id="btn-stats" class="quiet" type="button">Stats</button>
     </div>
-    <h2 id="table-title"><span id="table-name">Omaha Hi/Lo</span><span class="sub" id="table-sub" style="display:none"></span><span class="sub blood" id="table-blood" style="display:none">Blood in the Water</span></h2>
+    <h2 id="table-title"><span id="table-name">Omaha Hi/Lo</span><span class="sub" id="table-sub" style="display:none"></span><span class="sub" id="table-sub2" style="display:none"></span><span class="sub blood" id="table-blood" style="display:none">Blood in the Water</span></h2>
     <div class="topbar-right">
       <div class="toggles-col"><label class="coach-toggle"><input type="checkbox" id="coach-toggle"> Coach mode</label>
         <label class="coach-toggle"><input type="checkbox" id="bstyle-toggle"> Bot styles</label></div>
@@ -648,9 +706,9 @@
   <details class="rules" id="rules-hesitation"><summary>How Hesitation is played</summary>
     <div>
       <ul>
-        <li>One card down to everybody, then a betting round.</li>
+        <li>One card down to everybody. No betting yet.</li>
         <li><b>Pass round.</b> The first player gets a card face up. Keep it, or pay $1 and pass it to your left. It keeps moving until somebody keeps it; the next fresh card goes to the player after the keeper. A card nobody wants reaches the dealer and dies.</li>
-        <li>Once everyone has had a turn, anybody who passed is dealt a face-up card they have to keep. Then a betting round.</li>
+        <li>Once everyone has had a turn, anybody who passed is dealt a face-up card they have to keep. Then a betting round. The first betting round comes after the first pass round, and the player showing the best card opens it.</li>
         <li>Four pass rounds in all, until everyone holds one down and four up.</li>
         <li><b>The trade.</b> Discard one card and take a replacement of the same kind — down for down, up for up. Then one more betting round.</li>
         <li><b>The declare.</b> Everyone puts a hand down face down, in their own time. Once all are down, they turn up together: high, low, or both. Highs play against highs, lows against lows, and the pot splits. Declare both and you must win both, or you forfeit the whole thing to the next-best high and low.</li>
@@ -729,6 +787,8 @@
       </ul>
     </div>
   </details>
+
+  <details class="rules" id="rules-custom" style="display:none"><summary>How this custom game is played</summary><div id="rules-custom-body"></div></details>
 
   <details class="rules" id="rules-omaha5" style="display:none"><summary>How 5 Card Omaha Hi/Lo is played</summary>
     <div>
@@ -938,6 +998,25 @@
     </div>
   </details>
 
+  <details class="rules" id="rules-polishholdem" style="display:none"><summary>How Polish Holdem is played</summary>
+    <div>
+      <ul>
+        <li>Three cards down to everybody (Texas Hold’em deals two), then a betting round.</li>
+        <li>The flop: three community cards, then a betting round.</li>
+        <li>The turn: one more community card, then a betting round.</li>
+        <li>The river: one more community card (five total), then a final betting round.</li>
+        <li><b>The split.</b> Use 0, 1 or 2 of your three cards plus enough community cards to make five. Using none means you play the five board cards. There is no discard in this game.</li>
+        <li>Once the river's out, everyone picks their five — the game suggests the strongest combination it can find, and you can change it before locking it in.</li>
+        <li><b>The declare.</b> Everyone puts a hand down face down, in their own time. Once all are down, they turn up together: high, low, or both. Highs play against highs, lows against lows, and the pot splits. Declare both and you must win both, or you forfeit the whole thing to the next-best high and low.</li>
+        <li><b>Playing the board.</b> If the best hand on a side is just the board, everyone who plays it ties and splits that half, like any other tie.</li>
+        <li><b>Low hands.</b> By default any five cards can be a low: a hand with no pair beats one pair, which beats two pair, and so on, and lower cards win within each. If you set a limit on the main menu (9, 8 or 7 or better), a low needs five cards of different rank, no pairs, all at or under that limit. If nobody has a low that counts, high takes the whole pot.</li>
+        <li><b>The joker.</b> Plays as an ace, or as any card that completes a straight or a flush, for high. For low, it can stand in as any rank ace through 8, whichever helps most — never higher, even under "any low qualifies".</li>
+        <li>Action starts left of the dealer every round — nothing's visible before showdown, so there's no "best hand acts first" the way Hesitation plays it.</li>
+        <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
+      </ul>
+    </div>
+  </details>
+
   <details class="rules" id="rules-polish" style="display:none"><summary>How Polish Poker is played</summary>
     <div>
       <ul>
@@ -961,7 +1040,7 @@
       <ul>
         <li>Dealt and bet exactly like 7 Card Stud: two cards down, a bet, then four cards up one at a time with a bet after each, and a seventh card down with a final bet.</li>
         <li><b>No declare.</b> Everybody is playing high. Your hand is the best five of your seven cards.</li>
-        <li><b>Two winners.</b> The two best hands share the pot, half each, with any odd chip going to the better hand. If two hands tie for second, they split the second half; if two or more tie for best, they split the whole pot. There is no high/low split.</li>
+        <li><b>Two winners.</b> The two best hands share the pot, half each; an odd dollar goes to the Rich Pot for the next hand. If two hands tie for second, they split the second half; if two or more tie for best, they split the whole pot. There is no high/low split.</li>
         <li><b>High hands.</b> Normal poker high hands, best five of seven. The joker plays as an ace, or as any card that completes a straight or a flush.</li>
         <li>Each round after the first, the player showing the best high hand opens the betting, same as 7 Card Stud Hi/Lo.</li>
         <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
@@ -974,7 +1053,7 @@
       <ul>
         <li>Dealt and bet exactly like 7 Card Stud: two cards down, a bet, then four cards up one at a time with a bet after each, and a seventh card down with a final bet.</li>
         <li><b>No declare.</b> Everybody is playing low. Your hand is the best five of your seven cards.</li>
-        <li><b>Two winners.</b> The two best hands share the pot, half each, with any odd chip going to the better hand. If two hands tie for second, they split the second half; if two or more tie for best, they split the whole pot. There is no high/low split.</li>
+        <li><b>Two winners.</b> The two best hands share the pot, half each; an odd dollar goes to the Rich Pot for the next hand. If two hands tie for second, they split the second half; if two or more tie for best, they split the whole pot. There is no high/low split.</li>
         <li><b>Low hands.</b> Ace is low, and there is no qualifier: any five cards can win. A hand with no pair beats one pair, which beats two pair, and so on, and lower cards win within each. Straights and flushes do not hurt a low. The joker stands in as any rank ace through 8, whichever helps most.</li>
         <li>Each round after the first, the player showing the best high hand opens the betting, same as 7 Card Stud Hi/Lo.</li>
         <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
@@ -1030,7 +1109,7 @@ function shuffle(a){
   for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); const t=a[i]; a[i]=a[j]; a[j]=t; }
   return a;
 }
-function cardText(c){ return c.joker ? "Joker" : RNAME[c.r] + SYM[c.s]; }
+function cardText(c){ return c.joker ? "Joker" : (c.wildSpade ? RNAME[c.origR] + SYM[c.origS] + " (wild)" : RNAME[c.r] + SYM[c.s]); }
 /* which of a player's own cards made it into the hand they locked in */
 function usedHoleIdx(p){
   const key = c => c.joker ? "JK" : c.r + c.s;
@@ -1059,7 +1138,7 @@ function chicagoUsedIdx(p){
   if (!p.wonHigh && !p.wonSpade) return null;
   const idx = new Set();
   if (p.wonHigh) best5HighOf(p.cards).forEach(c=>{ const i = p.cards.indexOf(c); if (i>=0) idx.add(i); });
-  if (p.wonSpade){ const i = p.cards.indexOf(p.wonSpade); if (i>=0) idx.add(i); }
+  if (p.wonSpade){ const i = p.cards.indexOf(p.wonSpade.orig || p.wonSpade); if (i>=0) idx.add(i); }
   return idx.size ? idx : null;
 }
 /* the line under a winner's seat, worded like the declared-hand line in the other games */
@@ -1070,6 +1149,8 @@ function chicagoCalloutText(p){
   return parts.join(" / ");
 }
 function handOverText(){
+  if (halfCrit())
+    return "Hand over." + (G.players.some(p=>p.halfWon && p.halfWon.length) ? " Outlined cards are what won each half; dimmed ones weren't used." : "");
   if (isChicagoFamily(G.game))
     return "Hand over." + (G.players.some(p=>p.wonHigh || p.wonSpade) ? " Outlined cards are what won each half; dimmed ones weren't used." : "");
   return "Hand over." + (showdownMarksCards() ? " Outlined cards were used in each hand; dimmed ones weren't." : "");
@@ -1078,7 +1159,8 @@ function cardEl(c, cls){
   const d = document.createElement("div");
   d.className = "card " + (cls||"");
   if (!c){ d.className += " back"; return d; }
-  if (c.joker){ d.className += " jok"; d.textContent = "JOKER"; return d; }
+  if (c.joker){ d.className += " jok"; d.textContent = JOKER_DEAD ? "DEAD" : "JOKER"; if (JOKER_DEAD) d.className += " deadjok"; return d; }
+  if (isWildRank(c)) d.className += " wildc";
   if (c.s==="h"||c.s==="d") d.className += " red";
   const r = document.createElement("div"); r.className="r" + (RNAME[c.r].length>1 ? " ten" : ""); r.textContent = RNAME[c.r];
   const s = document.createElement("div"); s.className="s"; s.textContent = SYM[c.s];
@@ -1122,6 +1204,82 @@ function rank5(cards){
   return {score:score, cat:cat, kick:kick};
 }
 
+/* ===================== wild cards =====================
+   A custom game can make some ranks wild (WILD[rank] = true). A wild-rank card is FULLY wild: any rank and suit for high
+   (pairs, five of a kind, any straight or flush) and the lowest unused rank for low. The JOKER keeps its own rule (an ace, or
+   a card that completes a straight or a flush, for high; any rank for low) even when wild ranks are on, unless the custom
+   game says the joker is DEAD (JOKER_DEAD): then it is a blank card that can't be used for anything. Hands with no wild
+   card go through the old code untouched. */
+let WILD = {};
+let WILD_N = 0;
+let JOKER_DEAD = false;
+const _wildHi = new Map();
+/* a wild spec is {r:rank, s:[suits]} (s empty = every suit); WILD[rank] is true (all suits) or a list of the suits that are wild */
+function setWild(specs, jokerDead){
+  WILD = {}; WILD_N = 0;
+  (specs||[]).forEach(w=>{
+    if (typeof w==="number") w = {r:w, s:[]};
+    if (!w || !w.r) return;
+    WILD_N++;
+    if (!w.s || !w.s.length || WILD[w.r]===true) WILD[w.r] = true;
+    else WILD[w.r] = (WILD[w.r]||[]).concat(w.s);
+  });
+  JOKER_DEAD = !!jokerDead; _wildHi.clear();
+}
+function isWildRank(c){ if (c.joker) return false; const w = WILD[c.r]; return w===true || (!!w && w.indexOf(c.s)>=0); }
+function wl(c){ return (c.joker && !JOKER_DEAD) || isWildRank(c); }   /* "treat as wild" for the rough bot estimates */
+function rankWild(cards){
+  /* a dead joker stays in the hand as a plain blank (rank 0, suit "x"): it pairs with nothing and makes no straight or flush */
+  const wilds = cards.filter(isWildRank).length;
+  const jokers = JOKER_DEAD ? 0 : cards.filter(c=>c.joker).length;
+  const nat = cards.filter(c=>!isWildRank(c) && (JOKER_DEAD || !c.joker));
+  const key = nat.map(c=>c.r+c.s).sort().join(",") + "|" + wilds + "|" + jokers;
+  const hit = _wildHi.get(key); if (hit) return hit;
+  let res;
+  if (!nat.length){
+    res = rank5(cards.map((_,i)=>({r:14,s:SUITS[i%4]})));
+  } else {
+    /* wilds and the joker take the suit every natural card shares (so they can make a flush); otherwise suit can't matter */
+    const s0 = nat[0].s, oneSuit = nat.every(c=>c.s===s0), ws = oneSuit ? s0 : "s";
+    let best = null;
+    const leaf = (picked)=>{
+      let r = rank5(nat.concat(picked));
+      if (!best || r.score>best.score) best = r;
+    };
+    const rec = (start, left, picked)=>{
+      if (!left){
+        if (!jokers){ leaf(picked); return; }
+        /* the joker's own rule: an ace, or whatever completes a straight or flush */
+        for (let jr=2; jr<=14; jr++){
+          const r = rank5(nat.concat(picked, [{r:jr,s:ws}]));
+          const legal = jr===14 || r.cat===4 || r.cat===5 || r.cat===8;
+          if (legal && (!best || r.score>best.score)) best = r;
+        }
+        return;
+      }
+      for (let r=start; r<=14; r++) rec(r, left-1, picked.concat([{r:r,s:ws}]));
+    };
+    rec(2, wilds, []);
+    res = best || rank5(nat.concat(cards.slice(0, cards.length-nat.length).map(()=>({r:14,s:ws}))));
+  }
+  _wildHi.set(key, res);
+  if (_wildHi.size>20000) _wildHi.clear();
+  return res;
+}
+function wildLowVals(cards){
+  /* a wild takes the lowest rank not already held; a live joker does the same (capped at 8, which never bites in 5 cards);
+     a dead joker is a card nothing can use, worse than any qualifying low */
+  const nat = cards.filter(c=>!isWildRank(c) && !c.joker).map(c=>c.r===14?1:c.r);
+  const used = new Set(nat), out = nat.slice();
+  cards.forEach(c=>{
+    if (c.joker && JOKER_DEAD){ out.push(99); return; }
+    if (!(c.joker || isWildRank(c))) return;
+    let v = 1; while (used.has(v) && v<13) v++;
+    out.push(v); used.add(v);
+  });
+  return out;
+}
+
 /* joker for high: ace, or any card completing a straight or flush.
    Also handles more than 5 cards (7-card stud games): reduces to whichever
    5-card subset scores highest before doing anything else. Every other
@@ -1139,7 +1297,8 @@ function best5HighOf(cards){
 }
 function evalHighFull(cards){
   if (cards.length>5) cards = best5HighOf(cards);
-  if (!cards.some(c=>c.joker)) return rank5(cards);
+  if (WILD_N && cards.some(isWildRank)) return rankWild(cards);
+  if (!cards.some(c=>c.joker) || JOKER_DEAD) return rank5(cards);
   const others = cards.filter(c=>!c.joker);
   const used = {}; others.forEach(c=>{used[c.r+c.s]=1;});
   let best=null;
@@ -1181,6 +1340,8 @@ function lowScoreFromVals(vals){
 }
 function lowVals(cards){
   if (cards.length>5) cards = best5LowOf(cards);
+  if (WILD_N && cards.some(isWildRank)) return wildLowVals(cards);
+  if (JOKER_DEAD && cards.some(c=>c.joker)) return cards.map(c=>c.joker ? 99 : (c.r===14?1:c.r));
   if (!cards.some(c=>c.joker)) return cards.map(c=>c.r===14?1:c.r);
   const others = cards.filter(c=>!c.joker);
   const otherVals = others.map(c=>c.r===14?1:c.r);
@@ -1280,7 +1441,7 @@ function lowIsClean(cards){
 /* ranking of the exposed cards, for Hesitation's betting order */
 function visibleKey(cards){
   if (!cards.length) return 0;
-  const vs = cards.map(c=>c.joker?14:c.r);
+  const vs = cards.map(c=>wl(c)?14:c.r);
   const counts={}; vs.forEach(v=>{counts[v]=(counts[v]||0)+1;});
   const groups = Object.keys(counts).map(k=>({r:+k,c:counts[k]}))
                        .sort((a,b)=> b.c-a.c || b.r-a.r);
@@ -1292,7 +1453,7 @@ function visibleKey(cards){
 /* ===================== rough hand estimates ==================== */
 function estHigh(cards, toCome){
   if (!cards.length) return 0;
-  const vs = cards.map(c=>c.joker?14:c.r);
+  const vs = cards.map(c=>wl(c)?14:c.r);
   const counts={}; vs.forEach(v=>{counts[v]=(counts[v]||0)+1;});
   const cts = Object.keys(counts).map(k=>counts[k]).sort((a,b)=>b-a);
   let s=0;
@@ -1300,10 +1461,10 @@ function estHigh(cards, toCome){
   else if (cts[0]===3) s+=64;
   else if (cts[0]===2 && cts[1]===2) s+=50;
   else if (cts[0]===2) s+=27;
-  const jok = cards.some(c=>c.joker);
-  const suits={}; cards.forEach(c=>{ if(!c.joker) suits[c.s]=(suits[c.s]||0)+1; });
+  const wcount = cards.filter(wl).length, jok = wcount>0;
+  const suits={}; cards.forEach(c=>{ if(!wl(c)) suits[c.s]=(suits[c.s]||0)+1; });
   let mx=0; Object.keys(suits).forEach(k=>{ if(suits[k]>mx) mx=suits[k]; });
-  if (jok) mx+=1;
+  mx += wcount;
   if (mx+toCome>=5) s += Math.max(0,mx-1)*13;
   const u=[...new Set(vs)];
   let bw=0;
@@ -1314,7 +1475,7 @@ function estHigh(cards, toCome){
   }
   if (bw+toCome>=5) s += Math.max(0,bw-1)*11;
   s += Math.max.apply(null,vs)*0.8;
-  if (jok) s += 14;
+  s += 14*wcount;
   return s;
 }
 function estLow(cards, toCome){
@@ -1340,15 +1501,15 @@ function estSide(cards, toCome){
 /* ========================= coach mode (hesitation) ================ */
 function possibleCategories(cards, toCome){
   if (!cards.length) return { made:"nothing dealt yet", reach:[] };
-  const vals = cards.map(c=>c.joker?14:c.r);
+  const vals = cards.map(c=>wl(c)?14:c.r);
   const counts={}; vals.forEach(v=>{ counts[v]=(counts[v]||0)+1; });
   const cts = Object.keys(counts).map(k=>counts[k]).sort((a,b)=>b-a);
   const pairCount = cts.filter(c=>c>=2).length;
-  const jok = cards.some(c=>c.joker);
+  const wcount = cards.filter(wl).length;
 
-  const suits={}; cards.forEach(c=>{ if (!c.joker) suits[c.s]=(suits[c.s]||0)+1; });
+  const suits={}; cards.forEach(c=>{ if (!wl(c)) suits[c.s]=(suits[c.s]||0)+1; });
   let mxSuit=0; Object.keys(suits).forEach(k=>{ if (suits[k]>mxSuit) mxSuit=suits[k]; });
-  const flushPotential = mxSuit + (jok?1:0);
+  const flushPotential = mxSuit + wcount;
 
   const uniqVals=[...new Set(vals)];
   let bestSpan=0;
@@ -1388,7 +1549,7 @@ function possibleCategories(cards, toCome){
     if (!already2pair && !alreadyFull && pairCount+ (toCome>=1?1:0) >=2) reach.push("two pair");
   }
   const maxNeeded = CFG.lowQual==="any" ? 13 : CFG.lowQual;
-  const lv = cards.map(c=> c.joker?1:(c.r===14?1:c.r));
+  const lv = cards.map(c=> wl(c)?1:(c.r===14?1:c.r));
   const distinctLow = new Set(lv).size === cards.length
     ? lv.filter(v=>v<=maxNeeded).length : 0;
   if (distinctLow + toCome >= 5 && cards.length - distinctLow <= toCome) reach.push("a qualifying low");
@@ -1529,7 +1690,9 @@ const HOLE_USE_RANGE = {
   /* Caribbean / Aruba / Bermuda: two cards left after the discards; use none, one or both */
   caribbean: {min:0, max:2},
   aruba: {min:0, max:2},
-  bermuda: {min:0, max:2}
+  bermuda: {min:0, max:2},
+  /* Polish Holdem: three hole cards, use 0, 1 or 2 (board play is NOT a kicker case, see boardPlayInfo) */
+  polishholdem: {min:0, max:2}
 };
 /* The Omaha family shares a community board, a hole/board combo search, and
    the click-to-build hand-selection screen. Stud games don't have any of
@@ -1581,14 +1744,150 @@ function isDoubleGame(game){
 function isChicagoFamily(game){
   return game==="chicago" || game==="moriah";
 }
-function bestHoleSpade(p, wantHighest){
-  /* A Joker in the hole counts as the best spade possible for the game: above the ace of spades in Little Chicago,
-     below the deuce of spades in Moriah. It keeps joker:true so it still prints as "Joker". */
-  const spades = p.cards.filter(c=>!c.up && (c.joker || c.s==="s")).map(c=> c.joker ? {joker:true, s:"s", r: wantHighest ? 15 : 1} : c);
-  if (!spades.length) return null;
-  let best = spades[0];
-  spades.forEach(c=>{ if (wantHighest ? c.r>best.r : c.r<best.r) best=c; });
+/* The best face-down card of one suit in a player's hand: the highest (wantHighest) or lowest of that suit. A Joker in
+   the hole counts as the best card of any suit; so does a wild-rank card in a custom game. Face-up cards never count,
+   and in community games every card in hand is face down. Returns null when the player has none. */
+function bestHoleSuit(p, suit, wantHighest){
+  const found = p.cards.filter(c=>!c.up && ((c.joker && !JOKER_DEAD) || isWildRank(c) || (!c.joker && c.s===suit)))
+    .map(c=> c.joker ? {joker:true, s:suit, r: wantHighest ? 15 : 1}
+           : isWildRank(c) ? {wildSpade:true, orig:c, origR:c.r, origS:c.s, s:suit, r: wantHighest ? 15 : 1} : c);
+  if (!found.length) return null;
+  let best = found[0];
+  found.forEach(c=>{ if (wantHighest ? c.r>best.r : c.r<best.r) best=c; });
   return best;
+}
+function bestHoleSpade(p, wantHighest){ return bestHoleSuit(p, "s", wantHighest); }
+
+/* ---- custom games: what each half of the pot goes to ----
+   A half is "high" (best high hand), "low" (best qualifying low), or a suit in the hole: "hs" = highest spade face down,
+   "ls" = lowest spade face down, and likewise h/d/c for hearts, diamonds and clubs. Hi/Lo is high + low (with the
+   declare); Little Chicago is high + hs; Moriah is high + ls. Any other pairing plays with no declare. */
+const HALF_SUITS = {s:"spade", h:"heart", d:"diamond", c:"club"};
+const HALF_CHOICES = (function(){
+  const a = [["high","High hand"],["low","Low hand"]];
+  Object.keys(HALF_SUITS).forEach(k=>{ a.push(["h"+k, "Highest " + HALF_SUITS[k] + " in the hole"]); a.push(["l"+k, "Lowest " + HALF_SUITS[k] + " in the hole"]); });
+  return a;
+})();
+function halfValid(c){ return HALF_CHOICES.some(x=>x[0]===c); }
+function halfShort(c){
+  if (c==="high") return "high";
+  if (c==="low") return "low";
+  return (c.charAt(0)==="h" ? "high " : "low ") + HALF_SUITS[c.charAt(1)];
+}
+function halfDefaultB(base){ return base==="chicago" ? "hs" : base==="moriah" ? "ls" : "low"; }
+function customHalves(d){ return d.halfA && d.halfB ? [d.halfA, d.halfB] : ["high", halfDefaultB(d.base)]; }
+function customHalvesDefault(d){ const h = customHalves(d); return h[0]==="high" && h[1]===halfDefaultB(d.base); }
+/* null while the game splits its pot the usual way; otherwise the two halves of THIS hand */
+function halfCrit(){
+  const d = G.custom;
+  if (!d || !d.halfA || isDoubleGame(G.game)) return null;
+  return customHalvesDefault(d) ? null : [d.halfA, d.halfB];
+}
+function halfHandHigh(p){ return isCommunityFamily(G.game) ? ((bestForHigh(p.cards, G.board)||{}).combo || null) : p.cards; }
+function halfHandLow(p){
+  if (isCommunityFamily(G.game)) return ((bestForLow(p.cards, G.board)||{}).combo || null);
+  return lowQualifies(p.cards) ? p.cards : null;
+}
+/* who wins one half among these players: {win:[players], card:{pid:card}} */
+function pickHalf(crit, field){
+  const out = {win:[], card:{}};
+  if (crit==="high"){
+    let best=-1;
+    field.forEach(p=>{ const h = halfHandHigh(p); if (!h) return; const v = evalHigh(h);
+      if (v>best){ best=v; out.win=[p]; } else if (v===best) out.win.push(p); });
+  } else if (crit==="low"){
+    let best=Infinity;
+    field.forEach(p=>{ const h = halfHandLow(p); if (!h) return; const v = evalLow(h);
+      if (v<best){ best=v; out.win=[p]; } else if (v===best) out.win.push(p); });
+  } else {
+    const hiSide = crit.charAt(0)==="h", suit = crit.charAt(1);
+    let best=null;
+    field.forEach(p=>{
+      const c = bestHoleSuit(p, suit, hiSide); if (!c) return;
+      if (best===null || (hiSide ? c.r>best : c.r<best)){ best=c.r; out.win=[p]; out.card={}; out.card[p.id]=c; }
+      else if (c.r===best){ out.win.push(p); out.card[p.id]=c; }
+    });
+  }
+  return out;
+}
+function halfWinText(crit, p, pick){
+  if (crit==="high") return highName(halfHandHigh(p));
+  if (crit==="low") return lowText(halfHandLow(p)) + " low";
+  return "the " + cardText(pick.card[p.id]) + " in the hole";
+}
+function resolveHalves(contenders, potAmount, label, H){
+  if (contenders.length===1){
+    const w = contenders[0];
+    w.stack += potAmount; w.winner=true;
+    log(w.name + " " + sv(w,"take") + " the " + label + ", $" + potAmount + ", uncontested.", "big");
+    return;
+  }
+  const picks = H.map(c=>pickHalf(c, contenders));
+  const award = (i, amount, words)=>{
+    splitAmount(picks[i].win, amount).forEach(({p,got})=>{
+      p.stack += got; p.winner = true;
+      p.halfWon.push({crit:H[i], card:picks[i].card[p.id]||null});
+      log(p.name + " " + sv(p,"take") + " " + words + " the " + label + ", $" + got + ", with " + halfWinText(H[i], p, picks[i]) + ".", "big");
+    });
+  };
+  const A = picks[0], B = picks[1];
+  if (!A.win.length && !B.win.length){
+    const hi = pickHalf("high", contenders);
+    splitAmount(hi.win, potAmount).forEach(({p,got})=>{ p.stack+=got; p.winner=true; p.halfWon.push({crit:"high", card:null});
+      log(p.name + " " + sv(p,"win") + " the " + label + ", $" + got + ", with " + highName(halfHandHigh(p)) + " — neither half could be won.", "big"); });
+    return;
+  }
+  if (!A.win.length || !B.win.length){
+    const k = A.win.length ? 0 : 1;
+    const why = H[1-k]==="low" ? "no qualifying low" : (H[1-k]==="high" ? "no high hand" : "nobody had a " + HALF_SUITS[H[1-k].charAt(1)] + " in the hole");
+    splitAmount(picks[k].win, potAmount).forEach(({p,got})=>{
+      p.stack += got; p.winner = true; p.halfWon.push({crit:H[k], card:picks[k].card[p.id]||null});
+      log(p.name + " " + sv(p,"win") + " the " + label + ", $" + got + ", with " + halfWinText(H[k], p, picks[k]) + " — " + why + ".", "big");
+    });
+    return;
+  }
+  if (A.win.length===1 && B.win.length===1 && A.win[0]===B.win[0]){
+    const w = A.win[0]; w.stack += potAmount; w.winner = true;
+    w.halfWon.push({crit:H[0], card:A.card[w.id]||null}); w.halfWon.push({crit:H[1], card:B.card[w.id]||null});
+    log(w.name + " " + sv(w,"scoop") + " the " + label + ", $" + potAmount + " — " + halfWinText(H[0], w, A) + " and " + halfWinText(H[1], w, B) + ".", "big");
+    return;
+  }
+  const first = evenHalves(potAmount);
+  award(0, first, "half of");
+  award(1, first, "half of");
+}
+/* used by the showdown: which of a player's own cards won each half they took */
+function halvesUsedIdx(p){
+  if (!p.halfWon || !p.halfWon.length) return null;
+  const idx = new Set();
+  p.halfWon.forEach(h=>{
+    if (h.crit==="high") best5HighOf(p.cards).forEach(c=>{ const i=p.cards.indexOf(c); if (i>=0) idx.add(i); });
+    else if (h.crit==="low") best5LowOf(p.cards).forEach(c=>{ const i=p.cards.indexOf(c); if (i>=0) idx.add(i); });
+    else if (h.card){ const i = p.cards.indexOf(h.card.orig || h.card); if (i>=0) idx.add(i); }
+  });
+  return (idx.size===0 || idx.size===p.cards.length) ? null : idx;
+}
+function halvesCalloutText(p){
+  return (p.halfWon||[]).map(h=> h.crit==="high" ? highName(halfHandHigh(p)) : h.crit==="low" ? lowText(halfHandLow(p)) + " low" : cardText(h.card) + " " + halfShort(h.crit)).join(" / ");
+}
+/* community games with a non-standard split: nobody picks or declares, every hand plays its best way */
+function autoHalvesHands(){
+  active().forEach(p=>{
+    const o = bestForHigh(p.cards, G.board) || bestForLow(p.cards, G.board) || bestOverall(p.cards, G.board);
+    if (o){ p.selHole=o.holeIdx; p.selBoard=o.boardIdx; p.finalHand=o.combo; }
+    p.locked = true;
+  });
+}
+/* a bot's extra confidence from suit halves: the better its best card of that suit, the more it is worth */
+function halvesBonus(p){
+  const H = halfCrit(); if (!H) return 0;
+  let b = 0;
+  H.forEach(c=>{
+    if (c==="high" || c==="low") return;
+    const card = bestHoleSuit(p, c.charAt(1), c.charAt(0)==="h"); if (!card) return;
+    b += (c.charAt(0)==="h" ? (card.r-2)/13 : (15-card.r)/13) * 22;
+  });
+  return b;
 }
 function allCombos(hole, board){
   const out = [];
@@ -1685,7 +1984,7 @@ function playerOddsCrazy8(hole, board, contested){
 }
 
 /* ============================ state ============================ */
-const CFG = { game:"hesitation", players:5, skill:3, stack:40, lowQual:"any", straightsCount:false, bloodInWater:false, oilInWater:false };
+const CFG = { game:"hesitation", players:5, skill:3, stack:40, lowQual:"any", straightsCount:false, bloodInWater:false, oilInWater:false, dealSpeed:"slow" };
 const G = {
   game:"hesitation", randomMode:false, waterRandom:false,
   players:[], deck:[], board:[], pot:0, carry:0, carryIn:0, button:0, handNo:0,
@@ -1696,7 +1995,7 @@ const G = {
   session:0, betweenHands:false
 };
 /* The version number shown on the main menu and at the table. Change this one line whenever a new numbered copy is cut. */
-const APP_VERSION = "3.7";
+const APP_VERSION = "3.10";
 document.getElementById("ver-setup").textContent = document.getElementById("ver-game").textContent = "Version " + APP_VERSION;
 let resolver = null;
 /* ============ bot styles ============
@@ -1724,6 +2023,45 @@ const NAME_SETS = {
   parke:  { names:["Olen","Kevin","Richard","Jared","Mike W.","Jeff","Chase","Mike P","Dave"], styles:null }
 };
 function botStyle(p){ return BOT_STYLES[p.style] || BOT_STYLES.balanced; }
+/* Parke's Poker names can be edited in Settings. The list is remembered on this device (localStorage "hilo-parke-names"). */
+const PARKE_DEFAULT = NAME_SETS.parke.names.slice();
+(function parkeNamesEditor(){
+  const box = document.getElementById("f-parke-names"), row = document.getElementById("row-parke-names");
+  const msg = document.getElementById("parke-names-msg"), sel = document.getElementById("f-names");
+  if (!box || !row || !sel) return;
+  function parse(t){
+    const out = [];
+    t.split(/[\n,]+/).forEach(s=>{ s = s.replace(/[^A-Za-z0-9 '&.-]/g,"").trim().slice(0,12);
+      if (s && !out.some(x=>x.toLowerCase()===s.toLowerCase()) && out.length<14) out.push(s); });
+    return out;
+  }
+  function note(){
+    const need = parseInt((document.getElementById("f-players")||{}).value,10) || 5;   /* computer players */
+    const n = NAME_SETS.parke.names.length;
+    msg.textContent = n>=need ? n+" names (a game needs "+need+" bots; the extras are spares for bust-outs)."
+      : "Only "+n+" names, but "+need+" bots are needed: the Random names will be used until you add more.";
+    msg.style.color = n>=need ? "" : "#d9a441";
+  }
+  function show(){ row.style.display = sel.value==="parke" ? "" : "none"; note(); }
+  try { const s = JSON.parse(localStorage.getItem("hilo-parke-names")||"null");
+        if (Array.isArray(s)) { const v = parse(s.join(",")); if (v.length) NAME_SETS.parke.names = v; } } catch(e){}
+  box.value = NAME_SETS.parke.names.join(", ");
+  box.addEventListener("input", ()=>{
+    NAME_SETS.parke.names = parse(box.value);
+    try { localStorage.setItem("hilo-parke-names", JSON.stringify(NAME_SETS.parke.names)); } catch(e){}
+    note();
+  });
+  box.addEventListener("blur", ()=>{ box.value = NAME_SETS.parke.names.join(", "); });
+  document.getElementById("btn-parke-reset").addEventListener("click", ()=>{
+    NAME_SETS.parke.names = PARKE_DEFAULT.slice(); box.value = PARKE_DEFAULT.join(", ");
+    try { localStorage.removeItem("hilo-parke-names"); } catch(e){}
+    note();
+  });
+  sel.addEventListener("change", show);
+  const pl = document.getElementById("f-players"); if (pl) pl.addEventListener("change", note);
+  show();
+})();
+
 
 
 /* Every game belongs to a session. Leaving the table or starting a new game ends the
@@ -1848,6 +2186,7 @@ const BLURB = {
   aruba: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody and a bet, then the flop. Right after the flop everybody discards one card face down and bets again. Then the turn, another discard down to two cards, and a bet. Then the river and a final bet. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   bermuda: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody, and before any betting everybody discards one card face down, then bets. Then the flop, another discard down to two cards, and a bet. Then the turn and river, with a bet after each. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   caribbean: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody and a bet, then the flop. Right after the flop everybody discards two cards face down, keeping two, and bets again. Then the turn and river, with a bet after each. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
+  polishholdem: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody and a bet, then the flop and a bet, the turn and a bet, the river and a final bet \u2014 just like Texas Hold\u2019em, but with three hole cards instead of two. At the end use 0, 1 or 2 of your three cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   polish: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody, then a bet. Then a fourth card down and you flip one of your four face up, and a bet. Same again with the fifth card and the sixth, so you finish with six cards, three up and three down. Then each player still in may pay $4 to trade one of their cards for a new one (a face-up card is replaced face up, a face-down card face down), followed by a final bet. Your hand is the best five of your six cards, and you declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   doublestuff: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Dealt and bet like 7 Card Stud: two down, then four up one at a time and a seventh down, with a bet after each. No declare \u2014 everybody plays high, best five of seven, and the two best hands split the pot.",
   doublerazz: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Dealt and bet like 7 Card Stud: two down, then four up one at a time and a seventh down, with a bet after each. No declare \u2014 everybody plays low, best five of seven, no qualifier, and the two lowest hands split the pot.",
@@ -1871,6 +2210,7 @@ const TAG = {
   aruba: "Four cards down, then discard one after the flop and one after the turn. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
   bermuda: "Four cards down, discard one before the first bet and one after the flop. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
   caribbean: "Four cards down, then discard two after the flop. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
+  polishholdem: "Three cards down, then flop, turn and river like Texas Hold\u2019em. Use 0, 1 or 2 of your three cards. Set your own low qualifier below.",
   polish: "Three down, then a card at a time \u2014 flip one up each round until you hold six, three up and three down. Pay $4 to trade one card for a new one. Set your own low qualifier below.",
   doublestuff: "7 Card Stud with no declare \u2014 everybody plays high, and the two best hands split the pot.",
   doublerazz: "7 Card Stud with no declare \u2014 everybody plays low, and the two lowest hands split the pot.",
@@ -1879,7 +2219,7 @@ const TAG = {
 /* One shared place to name every game, used by the setup screen, the table
    header, the rules panel, and random mode's hand-to-hand announcement --
    so a future game only needs adding here once, not in each of those spots. */
-const GAME_TITLES = { hesitation:"Hesitation", crazy8:"Crazy 8", crazy:"Crazy", insane:"Insane", omaha:"Omaha Hi/Lo", omaha5:"5 Card Omaha Hi/Lo", little:"Little Omaha Hi/Lo", bigjohnson:"Big Johnson Omaha Hi/Lo", giant:"Giant Omaha Hi/Lo", ultimate:"Ultimate Omaha Hi/Lo", studhilo:"7 Card Stud Hi/Lo", studroll:"7 Card Stud Roll Your Own Hi/Lo", chicago:"Little Chicago", moriah:"Moriah", aruba:"Aruba", bermuda:"Bermuda", caribbean:"Caribbean", polish:"Polish Poker", doublestuff:"Double Stuff", doublerazz:"Double Razz", random:"Random" };
+const GAME_TITLES = { hesitation:"Hesitation", crazy8:"Crazy 8", crazy:"Crazy", insane:"Insane", omaha:"Omaha Hi/Lo", omaha5:"5 Card Omaha Hi/Lo", little:"Little Omaha Hi/Lo", bigjohnson:"Big Johnson Omaha Hi/Lo", giant:"Giant Omaha Hi/Lo", ultimate:"Ultimate Omaha Hi/Lo", studhilo:"7 Card Stud Hi/Lo", studroll:"7 Card Stud Roll Your Own Hi/Lo", chicago:"Little Chicago", moriah:"Moriah", aruba:"Aruba", bermuda:"Bermuda", caribbean:"Caribbean", polish:"Polish Poker", polishholdem:"Polish Holdem", doublestuff:"Double Stuff", doublerazz:"Double Razz", random:"Random" };
 /* the quick-reference line shown under the table title: how many of your own cards a hand may use (the Omaha family),
    "Best 5 for Hi or Lo" (the stud games), or what each half of the pot goes to (Little Chicago, Moriah). Hesitation has none. */
 const TABLE_SUBTITLE = {
@@ -1889,7 +2229,7 @@ const TABLE_SUBTITLE = {
   studhilo:"Best 5 for Hi or Lo", studroll:"Best 5 for Hi or Lo",
   chicago:"High Spade, High Hand", moriah:"Low Spade, High Hand",
   aruba:"Use 0, 1 or 2", bermuda:"Use 0, 1 or 2", caribbean:"Use 0, 1 or 2",
-  polish:"Best 5 for Hi or Lo",
+  polish:"Best 5 for Hi or Lo", polishholdem:"Use 0, 1 or 2",
   doublestuff:"Best 5 for High \u2014 top two split", doublerazz:"Best 5 for Low \u2014 two lowest split"
 };
 /* Everything eligible for "Random" comes straight from this dropdown's own
@@ -1898,10 +2238,11 @@ const TABLE_SUBTITLE = {
 /* games that are on the menu but have no rules built yet: not dealable, and kept out of Random.
    Remove a name from this list when its rules are added. */
 const COMING_SOON = [];
+const CUSTOM_DEFS = {}, CUSTOM_HOLE = {};   /* custom games (see "custom games" further down) */
 function listRealGames(){
   return [...document.querySelectorAll("#f-game option")]
     .map(o=>o.value)
-    .filter(v=>v!=="random" && COMING_SOON.indexOf(v)<0);
+    .filter(v=>v!=="random" && v.indexOf("custom:")!==0 && COMING_SOON.indexOf(v)<0);
 }
 function pickRandomGame(){
   const games = listRealGames();
@@ -1940,7 +2281,10 @@ function updateSetupForGame(){
   if (game==="hesitation"){
     $("row-lowqual").style.display = "flex";
     $("f-low").value = "any";
-  } else if (game==="omaha" || game==="omaha5" || game==="little" || game==="bigjohnson" || game==="giant" || game==="ultimate" || game==="aruba" || game==="bermuda" || game==="caribbean" || game==="polish" || game==="studhilo" || game==="studroll"){
+  } else if (CUSTOM_DEFS[game]){
+    $("row-lowqual").style.display = customUsesLow(CUSTOM_DEFS[game]) ? "flex" : "none";
+    $("f-low").value = CUSTOM_DEFS[game].low==="any" ? "any" : String(CUSTOM_DEFS[game].low);
+  } else if (game==="omaha" || game==="omaha5" || game==="little" || game==="bigjohnson" || game==="giant" || game==="ultimate" || game==="aruba" || game==="bermuda" || game==="caribbean" || game==="polish" || game==="polishholdem" || game==="studhilo" || game==="studroll"){
     $("row-lowqual").style.display = "flex";
     $("f-low").value = "any";
   } else {
@@ -1951,6 +2295,8 @@ function updateSetupForGame(){
   /* Blood in the Water only means anything for a game with a river. Random rolls it
      itself on each river hand, so it has no menu choice either. */
   $("row-bloodwater").style.display = isCommunityFamily(game) ? "flex" : "none";
+  /* card-by-card dealing is built for the Omaha-style games so far (Random can land on one) */
+  $("row-deal").style.display = "flex";
   const soon = COMING_SOON.indexOf(game)>=0;
   $("btn-start").disabled = soon;
   if (soon){ $("row-lowqual").style.display = "none"; }
@@ -1974,6 +2320,7 @@ function showRulesFor(game){
   $("rules-bermuda").style.display = game==="bermuda" ? "" : "none";
   $("rules-caribbean").style.display = game==="caribbean" ? "" : "none";
   $("rules-polish").style.display = game==="polish" ? "" : "none";
+  $("rules-polishholdem").style.display = game==="polishholdem" ? "" : "none";
   $("rules-doublestuff").style.display = game==="doublestuff" ? "" : "none";
   $("rules-doublerazz").style.display = game==="doublerazz" ? "" : "none";
   $("rules-studhilo").style.display = game==="studhilo" ? "" : "none";
@@ -1981,8 +2328,17 @@ function showRulesFor(game){
   $("rules-chicago").style.display = game==="chicago" ? "" : "none";
   $("rules-moriah").style.display = game==="moriah" ? "" : "none";
   $("rules-blood").style.display = isCommunityFamily(game) ? "" : "none";
-  $("table-name").textContent = GAME_TITLES[game] || game;
-  const subEl = $("table-sub"); subEl.textContent = TABLE_SUBTITLE[game] || ""; subEl.style.display = subEl.textContent ? "block" : "none";
+  const rcust = $("rules-custom");
+  rcust.style.display = G.custom ? "" : "none";
+  if (G.custom) $("rules-custom-body").innerHTML = customRulesHtml(G.custom);
+  /* a custom game's long name goes on a line of its own under a short "Custom Game" title, so the controls on the right keep their room */
+  const subEl = $("table-sub"), sub2El = $("table-sub2");
+  $("table-name").textContent = G.custom ? "Custom Game" : (GAME_TITLES[game] || game);
+  subEl.textContent = G.custom ? G.custom.name : (TABLE_SUBTITLE[game] || "");
+  subEl.className = "sub" + (G.custom ? " custname" : "");
+  sub2El.textContent = G.custom ? (TABLE_SUBTITLE[game] || "") : "";
+  subEl.style.display = subEl.textContent ? "block" : "none";
+  sub2El.style.display = sub2El.textContent ? "block" : "none";
   $("board").style.display = isCommunityFamily(game) ? "" : "none";
 }
 
@@ -2142,10 +2498,13 @@ $("btn-start").addEventListener("click", ()=>{
   endSession();
   const chosen = $("f-game").value;
   G.randomMode = chosen==="random";
-  G.game = G.randomMode ? pickRandomGame() : chosen;
+  G.custom = CUSTOM_DEFS[chosen] || null;
+  G.game = G.randomMode ? pickRandomGame() : (G.custom && isStudCustom(G.custom) ? G.custom.base : chosen);
+  setWild(G.custom ? G.custom.wild : [], G.custom && G.custom.joker==="dead");
   CFG.game = G.game;
   CFG.players = +$("f-players").value + 1;
   CFG.skill = +$("f-skill").value;
+  CFG.dealSpeed = $("f-deal").value;
   CFG.stack = 40;
   if (G.randomMode){
     applyGameDefaults(G.game);
@@ -2269,7 +2628,7 @@ function renderPotChips(){
   const live = G.players.reduce((s,p)=>s+(p.bet||0),0);   /* bets still on the table this round are shown by each player */
   const swept = Math.max(0, G.pot - live);
   if (swept<=0) return;
-  const halves = [Math.ceil(swept/2), Math.floor(swept/2)], labs = potStackLabels(G.game);
+  const halves = [Math.floor(swept/2), Math.floor(swept/2)], labs = potStackLabels(G.game);
   halves.forEach((amt,i)=>{
     const col = document.createElement("div"); col.className = "pcol";
     if (amt>0) col.appendChild(chipStackEl(amt)); else { const sp=document.createElement("div"); sp.style.height="14px"; col.appendChild(sp); }
@@ -2302,6 +2661,21 @@ function seatPos(i, n){
   return {left: x+"%", top: y+"%"};
 }
 
+/* Turning the phone (or any window resize that flips between the stacked phone layout and the oval table) while it is waiting on
+   YOUR move used to leave the seats piled in the top-left corner until you tapped something, because nothing redrew the table.
+   Redraw whenever the layout mode or the seat scale changes. */
+let _layoutKey = null;
+function layoutKey(){ return (window.matchMedia("(max-width:820px) and (min-height:561px)").matches ? "stacked" : "oval") + seatScale(); }
+function relayoutIfNeeded(){
+  requestAnimationFrame(()=>{
+    if (_layoutKey === null || !G.players.length) return;
+    const k = layoutKey();
+    if (k !== _layoutKey){ try{ render(); }catch(e){ console.error(e); } }
+  });
+}
+addEventListener("resize", relayoutIfNeeded);
+addEventListener("orientationchange", relayoutIfNeeded);
+
 /* what to show under a revealed declare -- the actual hand they had, for
    every player who was in it, so you can see what you beat or lost to */
 function shownHandText(p){
@@ -2316,6 +2690,7 @@ function shownHandText(p){
 
 function render(){
   if (!G.players.length) return;
+  _layoutKey = layoutKey();
   /* Random rolls Blood in the Water itself, so the checkbox only exists in a fixed-game session */
   $("blood-label").style.display = (isCommunityFamily(G.game) && !G.randomMode && !G.waterRandom) ? "flex" : "none";
   $("oil-label").style.display = (isCommunityFamily(G.game) && !G.randomMode && !G.waterRandom) ? "flex" : "none";
@@ -2357,7 +2732,7 @@ function render(){
 
   if (isCommunityFamily(G.game)){
     const boardEl = $("board"); boardEl.innerHTML="";
-    const boardSlots = Math.max(5, G.board.length); /* grows to 6 only once a Blood in the Water card is actually dealt */
+    const boardSlots = Math.max(G.boardSlots===undefined ? 5 : G.boardSlots, G.board.length); /* the 5 face-down slots are dealt last in the opening deal; a 6th shows only once a Blood/Oil card is dealt */
     for (let i=0;i<boardSlots;i++){
       const el = cardEl(G.board[i]||null, "big");
       if (G.handPickMode && i<G.board.length){
@@ -2383,6 +2758,7 @@ function render(){
     /* opponents get the same wider stud box (just not the extra "me" room)
        so a 7-card hand never overflows its own seat -- see .seat.stud */
     d.className = "seat" + (isMe?" me":"") + (isMe?sizeClass:(stud?" stud":"")) + (p.folded?" folded":"") + (G.acting===p.id?" acting":"") + (p.winner?" winner":"");
+    d.dataset.pid = p.id;
     if (!mobile){
       const pos = seatPos(i, G.players.length);
       /* keep the whole seat inside the table rim at any window width -- the
@@ -2430,7 +2806,7 @@ function render(){
         : p.cards.map((c,i)=>({c,i}));
       const downCount = stud ? displayCards.filter(x=>!x.c.up).length : 0;
       const usedS = (stud && G.showdown && p.finalHand && !p.folded)
-        ? (isChicagoFamily(G.game) ? chicagoUsedIdx(p) : (showdownMarksCards() ? usedStudIdx(p) : null)) : null;
+        ? (halfCrit() ? halvesUsedIdx(p) : isChicagoFamily(G.game) ? chicagoUsedIdx(p) : (showdownMarksCards() ? usedStudIdx(p) : null)) : null;
       displayCards.forEach((entry, pos)=>{
         const c = entry.c, ci = entry.i;
         const showFace = isMe || c.up || G.showdown;
@@ -2443,7 +2819,7 @@ function render(){
           ? (isMe && !c.up && pos===downCount-1 ? " holecard" : "")
           : (isMe && !c.up ? " holecard" : "");
         const cls = (isMe?"me":"op") + studSize + (pickable?" pick":"") + (isMe && G.picked===ci?" sel":"") + gapClass + (usedS ? (usedS.has(ci) ? " used" : " unused") : "");
-        const el = cardEl(showFace ? c : null, cls);
+        const el = cardEl(showFace ? c : null, cls); el._c = c;
         if (pickable){ el.addEventListener("click", ()=>answer({type:"pick", idx:ci})); }
         h.appendChild(el);
       });
@@ -2457,12 +2833,13 @@ function render(){
           const suggested = G.handPickMode && !selected && p.suggestHole && p.suggestHole.indexOf(ci)>=0;
           const dm = G.discardMode;
           const cls = "me " + (holeCount(G.game)===5?"small5":"small4") + ((G.handPickMode||dm)?" pick":"") + (selected?" sel":"") + (suggested?" suggested":"") + (dm && dm.sel.indexOf(ci)>=0 ? " todiscard" : "") + useCls;
-          const el = cardEl(showFace ? c : null, cls);
+          const el = cardEl(showFace ? c : null, cls); el._c = c;
           if (G.handPickMode){ el.addEventListener("click", ()=>toggleHole(ci)); }
           else if (dm){ el.addEventListener("click", ()=>toggleDiscard(ci)); }
           h.appendChild(el);
         } else {
-          h.appendChild(cardEl(showFace ? c : null, "op" + (showFace ? useCls : "")));
+          const oe = cardEl(showFace ? c : null, "op" + (showFace ? useCls : "")); oe._c = c;
+          h.appendChild(oe);
         }
       });
     }
@@ -2499,7 +2876,9 @@ function render(){
     if (isDoubleGame(G.game) && G.showdown && !p.folded && p.finalHand){
       const sh=document.createElement("div"); sh.className="shown-hand"; sh.textContent = shownHandText(p); d.appendChild(sh);
     }
-    if (isChicagoFamily(G.game) && G.showdown && !p.folded){
+    if (halfCrit() && G.showdown && !p.folded && p.halfWon && p.halfWon.length){
+      const sh=document.createElement("div"); sh.className="shown-hand"; sh.textContent = halvesCalloutText(p); d.appendChild(sh);
+    } else if (isChicagoFamily(G.game) && !halfCrit() && G.showdown && !p.folded){
       const wt = chicagoCalloutText(p);
       if (wt){ const sh=document.createElement("div"); sh.className="shown-hand"; sh.textContent = wt; d.appendChild(sh); }
     }
@@ -2566,7 +2945,7 @@ function render(){
         "<span class='lo'>Lo <b>" + odds.lo + "%</b></span></div>";
       mo.innerHTML = html;
     }
-  } else if (isChicagoFamily(G.game)){
+  } else if (isChicagoFamily(G.game) && !halfCrit()){
     if (G.coachMode && me.cards.length && !me.folded){
       const wantHighest = G.game==="chicago";
       const info = possibleCategories(me.cards, studFinalSize()-me.cards.length);
@@ -2627,7 +3006,7 @@ function render(){
     } else if (me.cards.length){
       txt += "<br>Low cards so far: <b>" + lowText(me.cards) + "</b>";
     }
-  } else if (isChicagoFamily(G.game)){
+  } else if (isChicagoFamily(G.game) && !halfCrit()){
     if (me.cards.length){
       const wantHighest = G.game==="chicago";
       if (me.cards.length>=5) txt += "<br>High: <b>" + highName(me.cards) + "</b>";
@@ -2653,6 +3032,11 @@ function render(){
       const loOk = lowQualifies(me.finalHand);
       txt += "<br>Low: <b>" + (loOk ? lowText(me.finalHand)+" low" : "doesn't qualify") + "</b>";
     }
+  }
+  if (halfCrit() && me.cards.length){
+    halfCrit().forEach(c=>{ if (c==='high'||c==='low') return;
+      const bc = bestHoleSuit(me, c.charAt(1), c.charAt(0)==='h');
+      txt += '<br>' + (c.charAt(0)==='h' ? 'Highest ' : 'Lowest ') + HALF_SUITS[c.charAt(1)] + ' in your hole: <b>' + (bc ? cardText(bc) : 'none') + '</b>'; });
   }
   if (me.declared && !G.declareRevealed){
     txt += "<br><span style='color:var(--amber)'>You declared \u2014 waiting on the table.</span>";
@@ -2727,7 +3111,7 @@ function holeRange(){
 /* how many hole cards get dealt for each game -- 5 Card Omaha is the one
    exception to the usual 4. */
 function holeCount(game){
-  return game==="omaha5" ? 5 : 4;
+  return CUSTOM_HOLE[game] || (game==="omaha5" ? 5 : game==="polishholdem" ? 3 : 4);
 }
 function toggleHole(i){
   const me = G.players[0];
@@ -2964,14 +3348,14 @@ function boardScareHesitation(cards){
   let mxSuit=0; Object.keys(suits).forEach(k=>{ if (suits[k]>mxSuit) mxSuit=suits[k]; });
   const flushLook = mxSuit + (jok?1:0);
   const flushScore = flushLook>=4 ? 34 : flushLook===3 ? 13 : 0;
-  const vals = [...new Set(cards.map(c=>c.joker?14:c.r))];
+  const vals = [...new Set(cards.map(c=>wl(c)?14:c.r))];
   let bestSpan=0;
   for (let lo=1; lo<=10; lo++){
     let c=0; vals.forEach(v=>{ if (v>=lo && v<lo+5) c++; });
     if (c>bestSpan) bestSpan=c;
   }
   const straightScore = bestSpan>=4 ? 27 : bestSpan===3 ? 9 : 0;
-  const counts={}; cards.forEach(c=>{ const v=c.joker?14:c.r; counts[v]=(counts[v]||0)+1; });
+  const counts={}; cards.forEach(c=>{ const v=wl(c)?14:c.r; counts[v]=(counts[v]||0)+1; });
   let mxPair=0; Object.keys(counts).forEach(k=>{ if (counts[k]>mxPair) mxPair=counts[k]; });
   const pairScore = mxPair>=3 ? 21 : mxPair===2 ? 7 : 0;
   return Math.max(flushScore, straightScore, pairScore);
@@ -2981,7 +3365,7 @@ function botBetHesitation(p, toCall, canRaise, checkStreak){
   const toCome = 5 - p.cards.length;
   const known = p.cards.length;
   const infoFactor = Math.max(0.35, known/5);
-  const mine = estBest(p.cards, toCome);
+  const mine = estBest(p.cards, toCome) + halvesBonus(p);
   const threat = oppThreat(p.id);
 
   const scare = boardScareHesitation(upCards(p));
@@ -3026,7 +3410,7 @@ function botBetStud(p, toCall, canRaise, checkStreak){
   const toCome = finalSize - p.cards.length;
   const known = p.cards.length;
   const infoFactor = Math.max(0.35, known/finalSize);
-  const mine = estSide(p.cards, toCome);
+  const mine = estSide(p.cards, toCome) + halvesBonus(p);
   const threat = oppThreat(p.id, finalSize);
 
   const scare = boardScareHesitation(upCards(p));
@@ -3079,7 +3463,7 @@ function botBetChicago(p, toCall, canRaise, checkStreak){
   const known = p.cards.length;
   const infoFactor = Math.max(0.35, known/finalSize);
   const wantHighest = G.game==="chicago";
-  const mine = estBest(p.cards, toCome) + chicagoSpadeBonus(p, wantHighest);
+  const mine = estBest(p.cards, toCome) + (halfCrit() ? halvesBonus(p) : chicagoSpadeBonus(p, wantHighest));
   const threat = oppThreat(p.id, finalSize);
 
   const scare = boardScareHesitation(upCards(p));
@@ -3120,14 +3504,14 @@ function boardScareCrazy8(cards){
   const suits={}; cards.forEach(c=>{ if (!c.joker) suits[c.s]=(suits[c.s]||0)+1; });
   let mxSuit=0; Object.keys(suits).forEach(k=>{ if (suits[k]>mxSuit) mxSuit=suits[k]; });
   const flushScore = mxSuit>=4 ? 34 : mxSuit===3 ? 13 : 0;
-  const vals = [...new Set(cards.map(c=>c.joker?14:c.r))];
+  const vals = [...new Set(cards.map(c=>wl(c)?14:c.r))];
   let bestSpan=0;
   for (let lo=1; lo<=10; lo++){
     let c=0; vals.forEach(v=>{ if (v>=lo && v<lo+5) c++; });
     if (c>bestSpan) bestSpan=c;
   }
   const straightScore = bestSpan>=4 ? 27 : bestSpan===3 ? 9 : 0;
-  const counts={}; cards.forEach(c=>{ const v=c.joker?14:c.r; counts[v]=(counts[v]||0)+1; });
+  const counts={}; cards.forEach(c=>{ const v=wl(c)?14:c.r; counts[v]=(counts[v]||0)+1; });
   let mxPair=0; Object.keys(counts).forEach(k=>{ if (counts[k]>mxPair) mxPair=counts[k]; });
   const pairScore = mxPair>=3 ? 21 : mxPair===2 ? 7 : 0;
   const lowCount = cards.filter(c=>!c.joker && c.r<=8).length;
@@ -3141,9 +3525,18 @@ function botBetCrazy8(p, toCall, canRaise, checkStreak){
   const known = Math.min(5, G.board.length);
   const contested = 5-known;
   const best = bestOverall(p.cards, G.board);
-  const mine = best ? Math.max(estHigh(best.combo,0), lowQualifies(best.combo)?estLow(best.combo,0):-999)
+  let mine = best ? Math.max(estHigh(best.combo,0), lowQualifies(best.combo)?estLow(best.combo,0):-999)
                      : estBest(p.cards, contested+1);
-  const threat = boardScareCrazy8(G.board) * 0.6;
+  if (halfCrit()){
+    const H = halfCrit(), hb = bestForHigh(p.cards, G.board), lb = bestForLow(p.cards, G.board);
+    const hv = hb ? estHigh(hb.combo,0) : -999, lv = lb ? estLow(lb.combo,0) : -999;
+    mine = Math.max(H.indexOf("high")>=0 ? hv : -999, H.indexOf("low")>=0 ? lv : -999);
+    if (mine<=-999) mine = 10;
+    mine += halvesBonus(p);
+  }
+  let threat = boardScareCrazy8(G.board) * 0.6;
+  /* custom games: opponents holding fewer cards, or allowed to use fewer of them, are less dangerous than the Omaha-sized scare assumes */
+  if (G.custom) threat *= Math.min(1, 0.5 + 0.125*p.cards.length) * (G.custom.min<2 ? 0.8 : 1);
 
   let r = mine - threat - 4;
   const infoFactor = Math.max(0.35, (known+1)/6);
@@ -3166,7 +3559,9 @@ function botBetCrazy8(p, toCall, canRaise, checkStreak){
   const potOdds = toCall / Math.max(1,(G.pot+toCall));
   const canFold = known>=3;
   if (canFold){
-    const foldLine = 26 + potOdds*8 + Math.max(0,toCall-1)*FOLD_PER_DOLLAR_BOARD;
+    let foldLine = 26 + potOdds*8 + Math.max(0,toCall-1)*FOLD_PER_DOLLAR_BOARD;
+    /* custom games: with fewer cards held (or fewer needed) a made hand is harder to come by, so bots hang in a little longer */
+    if (G.custom) foldLine -= Math.max(0, 4-p.cards.length)*5 + (G.custom.min<2 ? 4 : 0);
     if (r < foldLine + st.fold) return {a:"fold"};
   }
   if (canRaise && Math.random() < st.bluffRaise) return {a:"raise", amt:2};
@@ -3226,6 +3621,7 @@ async function passRound(roundNo){
       render();
     }
     G.offer=null; render();
+    if (kept) slideCard(order[holder], card);
     if (kept){ i = holder + 1; }
     else {
       G.dead.push(card);
@@ -3242,7 +3638,7 @@ async function passRound(roundNo){
       p.cards.push(c);
       p.status = "dealt " + cardText(c);
       log(p.name + " " + sv(p,null,["are dealt","is dealt"]) + " " + cardText(c) + ", no choice.");
-      render();
+      render(); slideCard(p, c);
       await sleep(720);
     }
   }
@@ -3272,7 +3668,7 @@ async function passRoundCatchup(roundNo){
       got[idx] = true;
       p.status = "dealt " + cardText(c);
       log(p.name + " " + sv(p,null,["are dealt","is dealt"]) + " " + cardText(c) + ", no choice.");
-      render();
+      render(); slideCard(p, c);
       await sleep(720);
     }
   }
@@ -3305,7 +3701,7 @@ async function passRoundCatchup(roundNo){
         p.cards.push(card); got[idx]=true;
         p.status = "took " + cardText(card);
         log(p.name + " " + sv(p,"keep") + " " + cardText(card) + ".", "hl");
-        G.offer=null; render();
+        G.offer=null; render(); slideCard(p, card);
         await catchUp(chainPassed);
         chainStart = (idx+1) % n;
         break;
@@ -3383,6 +3779,7 @@ async function tradeRound(){
     }
     p.traded = true;
     render();
+    if (idx >= 0) slideCard(p, p.cards[idx]);
     await sleep(1240);
   }
   G.acting=null;
@@ -3440,7 +3837,7 @@ function botRollChoice(p, downIdx){
      logic used elsewhere in the bot AI. */
   let bestIdx = downIdx[0], bestRank = Infinity;
   downIdx.forEach(i=>{
-    const r = p.cards[i].joker ? 14 : p.cards[i].r;
+    const r = wl(p.cards[i]) ? 14 : p.cards[i].r;
     if (r<bestRank){ bestRank=r; bestIdx=i; }
   });
   if (CFG.skill>=3 && Math.random()<0.15){
@@ -3523,7 +3920,7 @@ async function discardRound(stage){
   if (!n) return;
   const order = active();
   if (order.length<2) return;
-  const word = n===1 ? "one card" : "two cards";
+  const word = ["", "one card", "two cards", "three cards"][n] || (n + " cards");
   const me = G.players[0];
   if (!me.folded && !me.out && me.cards.length>n){
     G.acting = 0;
@@ -3539,7 +3936,7 @@ async function discardRound(stage){
     const shown = drop.slice().reverse().map(i=>cardText(me.cards[i]));
     drop.forEach(i=>{ me.muck.push(me.cards.splice(i,1)[0]); });
     G.discardMode = null;
-    me.status = n===1 ? "discarded 1" : "discarded 2";
+    me.status = "discarded " + n;
     log("You discard " + shown.join(" and ") + ".");
     render();
   }
@@ -3548,13 +3945,361 @@ async function discardRound(stage){
     await sleep(450);
     const drop = botChooseDiscards(p, n).sort((a,b)=>b-a);
     drop.forEach(i=>{ p.muck.push(p.cards.splice(i,1)[0]); });
-    p.status = n===1 ? "discarded 1" : "discarded 2";
+    p.status = "discarded " + n;
     log(p.name + " " + sv(p,"discard") + " " + word + ".");
     render();
   }
   G.acting = null;
   await sleep(500);
 }
+
+
+/* ===================== custom games ===================== */
+/* A custom game is a built-in game plus a few changes. Community-card customs (Omaha-style) are registered into the same
+   tables the built-in games use (HOLE_USE_RANGE, DISCARD_GAMES, GAME_TITLES ...) under an id "custom:xxxx". Stud customs
+   (7 Card Stud Hi/Lo, Roll Your Own, Double Stuff, Double Razz) play AS their base game: G.game is the base id and
+   G.custom holds the changes. Changes: cards dealt, cards used, low qualifier, discards at four points, wild ranks, and
+   a "buy a card" round (pay to trade one card in) at one point. Saved ones live in localStorage and appear in the Game list. */
+const CUSTOM_KEY = "hilo-custom-games";
+const CUSTOM_STAGES = [["deal","Before the flop"],["flop","After the flop"],["turn","After the turn"],["river","After the river"]];
+const CUSTOM_BASES = ["omaha","omaha5","little","bigjohnson","giant","ultimate","crazy8","crazy","insane","caribbean","aruba","bermuda","studhilo","studroll","doublestuff","doublerazz","chicago","moriah","polish","hesitation"];
+const STUD_BASES = ["studhilo","studroll","doublestuff","doublerazz","chicago","moriah","polish","hesitation"];   /* these play AS the base game */
+const NO_LOW_BASES = ["chicago","moriah","doublestuff","doublerazz"];   /* no low qualifier to choose */
+/* does the low qualifier matter? only when one of the two halves is the low hand (Double Stuff / Razz have no halves) */
+function customUsesLow(d){ return d.base!=="doublestuff" && d.base!=="doublerazz" && customHalves(d).indexOf("low")>=0; }
+const STUD_BUY_STAGES = [[3,"before the 3rd card"],[4,"before the 4th card"],[5,"before the 5th card"],[6,"before the 6th card"],[7,"before the last card (7th)"]];
+const POLISH_BUY_STAGES = [[4,"before the 4th card"],[5,"before the 5th card"],[6,"before the 6th card"],[7,"after the 6th card, before the last bet (standard)"]];
+const HES_BUY_STAGES = [["pass1","after pass round 1, before the betting"],["pass2","after pass round 2, before the betting"],["pass3","after pass round 3, before the betting"],["pass4","after pass round 4, before the betting"],["end","at the end, before the declare"]];
+/* where a custom game can run its buy-a-card round: a list of [stage, label]; numbers are card numbers, strings are named points */
+function buyStagesOf(base){
+  if (base==="polish") return POLISH_BUY_STAGES;
+  if (base==="hesitation") return HES_BUY_STAGES;
+  if (STUD_BASES.indexOf(base)>=0) return STUD_BUY_STAGES;
+  return CUSTOM_STAGES.map(x=>[x[0], x[1].toLowerCase()]);
+}
+const NUM_WORDS = ["Zero","One","Two","Three","Four","Five","Six"];
+const RANK_NAMES = {2:"2",3:"3",4:"4",5:"5",6:"6",7:"7",8:"8",9:"9",10:"10",11:"J",12:"Q",13:"K",14:"A"};
+const RANK_PLURAL = {2:"deuces",3:"threes",4:"fours",5:"fives",6:"sixes",7:"sevens",8:"eights",9:"nines",10:"tens",11:"jacks",12:"queens",13:"kings",14:"aces"};
+function isStudCustom(d){ return STUD_BASES.indexOf(d.base)>=0; }
+function useWord(min, max){
+  if (min===max) return String(min);
+  if (max-min===1) return min + " or " + max;
+  return min + " to " + max;
+}
+/* named cards players call out as wild: value, drop-down label, the cards (rank, suit), and how the rules wording names them */
+const WILD_SPECIAL = [
+  {v:"sk",   label:"Suicide king (K\u2665)",                 cards:[[13,"h"]],                         nm:"the suicide king (K\u2665\uFE0E)"},
+  {v:"axe",  label:"Man with the axe (K\u2666)",             cards:[[13,"d"]],                         nm:"the man with the axe (K\u2666\uFE0E)"},
+  {v:"oej",  label:"One-eyed jacks (J\u2660 J\u2665)",      cards:[[11,"s"],[11,"h"]],                nm:"the one-eyed jacks (J\u2660\uFE0E J\u2665\uFE0E)"},
+  {v:"oer",  label:"One-eyed royals (J\u2660 J\u2665 K\u2666)", cards:[[11,"s"],[11,"h"],[13,"d"]],  nm:"the one-eyed royals (J\u2660\uFE0E J\u2665\uFE0E K\u2666\uFE0E)"},
+  {v:"bm",   label:"Black Mariah (Q\u2660)",                 cards:[[12,"s"]],                         nm:"Black Mariah (Q\u2660\uFE0E)"},
+  {v:"bj",   label:"Black jacks (J\u2660 J\u2663)",         cards:[[11,"s"],[11,"c"]],                nm:"the black jacks (J\u2660\uFE0E J\u2663\uFE0E)"},
+  {v:"rj",   label:"Red jacks (J\u2665 J\u2666)",           cards:[[11,"h"],[11,"d"]],                nm:"the red jacks (J\u2665\uFE0E J\u2666\uFE0E)"},
+  {v:"face", label:"Face cards (J, Q, K)",                    cards:[[11,null],[12,null],[13,null]],    nm:"the face cards (J, Q, K)"}
+];
+function wildWord(d){
+  const seen = {};
+  const w = (d.wild||[]).slice().sort((a,b)=>a.r-b.r).map(x=>{
+    if (x.nm) return x.nm;
+    if (!x.s || !x.s.length) return RANK_PLURAL[x.r];
+    if (x.sk) return "the suicide king (K\u2665\uFE0E)";
+    return "the " + x.s.map(k=>RANK_NAMES[x.r] + SYM[k] + "\uFE0E").join(" and ");
+  }).filter(t=>{ if (seen[t]) return false; seen[t] = 1; return true; });
+  if (!w.length) return "";
+  return w.length===1 ? w[0] : w.slice(0,-1).join(", ") + " and " + w[w.length-1];
+}
+function buyStageWord(d){
+  if (!d.buy) return "";
+  return (buyStagesOf(d.base).filter(x=>x[0]===d.buy.stage)[0]||[0,""])[1];
+}
+function customAutoName(d){
+  const bs = GAME_TITLES[d.base] || "Custom";
+  let n;
+  if (isStudCustom(d)) n = bs + " Custom";
+  else n = d.hole + " Card Custom — use " + useWord(d.min, d.max);
+  const bits = [];
+  if (!isStudCustom(d)) CUSTOM_STAGES.forEach(([k,label])=>{ if (d.disc[k]) bits.push(d.disc[k] + " " + label.toLowerCase()); });
+  if (bits.length) n += ", discard " + bits.join(" + ");
+  if (d.wild && d.wild.length) n += ", " + wildWord(d) + " wild";
+  if (d.joker==="dead") n += ", joker dead";
+  if (d.buy) n += ", buy " + buyStageWord(d).replace(/ \(.*\)/,"");
+  else if (d.base==="polish") n += ", no buying";
+  if (!customHalvesDefault(d) && !isDoubleGame(d.base)) n += ", pot: " + halfShort(d.halfA) + " + " + halfShort(d.halfB);
+  if (d.low!=="any" && customUsesLow(d)) n += ", " + d.low + "-or-better low";
+  return n;
+}
+function customRulesHtml(d){
+  const li = [];
+  if (isStudCustom(d)){
+    li.push("<li>Plays exactly like <b>" + GAME_TITLES[d.base] + "</b> (see its rules), with these changes:</li>");
+  } else {
+    li.push("<li>" + NUM_WORDS[d.hole] + " cards down to everybody, then a betting round" + (d.disc.deal ? ", after you each discard " + d.disc.deal + "." : ".") + "</li>");
+    const stg = (txt, key)=> "<li>" + txt + (d.disc[key] ? " Everyone then discards " + d.disc[key] + " card" + (d.disc[key]>1?"s":"") + " face down, before the betting round." : " Then a betting round.") + "</li>";
+    li.push(stg("The flop: three community cards.", "flop"));
+    li.push(stg("The turn: one more community card.", "turn"));
+    li.push(stg("The river: one more community card (five total).", "river"));
+    li.push("<li><b>Your hand.</b> Use " + (d.min===d.max ? "exactly " + d.min : useWord(d.min, d.max)) + " of your own cards, plus enough community cards to make five.</li>");
+    if (customHalvesDefault(d)) li.push("<li><b>The declare, split and low.</b> The same as Omaha Hi/Lo: everyone declares high, low or both, and highs play against highs, lows against lows.</li>");
+  }
+  if (!isDoubleGame(d.base) && !customHalvesDefault(d)){
+    const h = customHalves(d), nm = c=> c==="high" ? "the best high hand" : c==="low" ? "the best low hand" : "the " + (c.charAt(0)==="h" ? "highest" : "lowest") + " " + HALF_SUITS[c.charAt(1)] + " held face down";
+    li.push("<li><b>The pot is split in two.</b> Half goes to " + nm(h[0]) + ", half to " + nm(h[1]) + ". Nobody declares; every hand plays its best way, and one player can win both halves.</li>");
+    if (h.some(c=>c!=="high" && c!=="low")) li.push("<li><b>Suit halves</b> look only at your face-down cards (the ace counts as the highest card of its suit). If nobody holds that suit face down" + (h.indexOf("low")>=0 ? ", or no low qualifies," : "") + " the other half's winner takes the whole pot.</li>");
+    else if (h.indexOf("low")>=0 && h.indexOf("high")<0) li.push("<li>If no low qualifies, the other half's winner takes the whole pot.</li>");
+  }
+  if (customUsesLow(d)) li.push("<li><b>Low hand.</b> " + (d.low==="any" ? "Any low counts (no qualifier)." : "A low must be " + d.low + " or better to count.") + "</li>");
+  if (d.wild && d.wild.length) li.push("<li><b>Wild cards.</b> Wild: " + wildWord(d) + ". A wild card can be any card you like (pairs, five of a kind, any straight or flush) for the high hand, and the lowest rank you don’t already hold for the low. Wild cards are marked in gold.</li>");
+  if (d.joker==="dead") li.push("<li><b>The joker is dead.</b> It is dealt like any card but can’t be used for anything: not as an ace, not for a straight or flush, not in a low" + ((isChicagoFamily(d.base) || !customHalvesDefault(d)) ? ", and not in a suit half" : "") + ".</li>");
+  else if (d.wild && d.wild.length) li.push("<li><b>The joker</b> keeps its usual rule: an ace, or a card that completes a straight or a flush, for high; any rank for low.</li>");
+  if (d.wild && d.wild.length && (isChicagoFamily(d.base) || !customHalvesDefault(d))) li.push("<li><b>Suit halves.</b> Like the joker, a wild card held in the hole counts as the best card of the suit.</li>");
+  if (d.buy) li.push("<li><b>Buy a card.</b> " + buyStageWord(d).replace(/^./, m=>m.toUpperCase()) + ", everyone still in may pay $4 to trade one of their cards for a new one.</li>");
+  return "<ul>" + li.join("") + "</ul>";
+}
+function customGroup(create){
+  let g = document.getElementById("cg-group");
+  if (!g && create){
+    g = document.createElement("optgroup"); g.id = "cg-group"; g.label = "Custom games";
+    const sel = $("f-game"), rnd = sel.querySelector('option[value="random"]');
+    sel.insertBefore(g, rnd);
+  }
+  return g;
+}
+function customOptionLabel(d){ return d.name + (d.saved ? "" : " (not saved)"); }
+function addCustomOption(d){
+  const g = customGroup(true);
+  let o = g.querySelector('option[value="' + d.id + '"]');
+  if (!o){ o = document.createElement("option"); o.value = d.id; g.appendChild(o); }
+  o.textContent = customOptionLabel(d);
+}
+function registerCustom(d){
+  CUSTOM_DEFS[d.id] = d;
+  GAME_TITLES[d.id] = d.name;
+  TAG[d.id] = "Custom game";
+  if (isStudCustom(d)){
+    TABLE_SUBTITLE[d.id] = TABLE_SUBTITLE[d.base] || "";
+    BLURB[d.id] = "A custom " + GAME_TITLES[d.base] + (customHalvesDefault(d) ? "" : " (pot: " + halfShort(d.halfA) + " + " + halfShort(d.halfB) + ")") + (d.wild && d.wild.length ? ", " + wildWord(d) + " wild" : "") + (d.joker==="dead" ? ", joker dead" : "") + (d.buy ? ", with a buy-a-card round" : "") + ".";
+  } else {
+    CUSTOM_HOLE[d.id] = d.hole;
+    HOLE_USE_RANGE[d.id] = { min:d.min, max:d.max };
+    const plan = {}; let any = false;
+    CUSTOM_STAGES.forEach(([k])=>{ if (d.disc[k]){ plan[k] = d.disc[k]; any = true; } });
+    if (any) DISCARD_GAMES[d.id] = plan; else delete DISCARD_GAMES[d.id];
+    TABLE_SUBTITLE[d.id] = "Use " + useWord(d.min, d.max);
+    BLURB[d.id] = "A custom game: " + d.hole + " cards each, use " + useWord(d.min, d.max) + " of them" +
+                  (d.low==="any" ? "" : ", " + d.low + "-or-better low") + (d.wild && d.wild.length ? ", " + wildWord(d) + " wild" : "") + (d.joker==="dead" ? ", joker dead" : "") + (d.buy ? ", with a buy-a-card round" : "") + ".";
+  }
+  addCustomOption(d);
+}
+function unregisterCustom(id){
+  delete CUSTOM_DEFS[id]; delete CUSTOM_HOLE[id]; delete HOLE_USE_RANGE[id]; delete DISCARD_GAMES[id];
+  delete GAME_TITLES[id]; delete TABLE_SUBTITLE[id]; delete TAG[id]; delete BLURB[id];
+  const g = customGroup(false);
+  if (g){ const o = g.querySelector('option[value="' + id + '"]'); if (o) o.remove(); if (!g.children.length) g.remove(); }
+}
+function persistCustoms(){
+  try{ localStorage.setItem(CUSTOM_KEY, JSON.stringify(Object.values(CUSTOM_DEFS).filter(d=>d.saved))); }catch(e){}
+}
+function loadSavedCustoms(){
+  let arr = [];
+  try{ arr = JSON.parse(localStorage.getItem(CUSTOM_KEY) || "[]"); }catch(e){ arr = []; }
+  (Array.isArray(arr) ? arr : []).forEach(d=>{
+    if (!d || typeof d.id!=="string" || d.id.indexOf("custom:")!==0 || !d.name || !d.disc) return;
+    if (!d.base) d.base = "omaha";                       /* games saved before stud customs existed */
+    if (!Array.isArray(d.wild)) d.wild = [];
+    d.wild = d.wild.map(w=> typeof w==="number" ? {r:w, s:[]} : w).filter(w=>w && w.r>=2 && w.r<=14).slice(0,8);
+    if (d.buy===undefined) d.buy = null;
+    if (d.joker!=="dead") d.joker = "normal";
+    if (!halfValid(d.halfA) || !halfValid(d.halfB) || d.halfA===d.halfB){ delete d.halfA; delete d.halfB; }
+    if (!isStudCustom(d) && !(d.hole>=2 && d.hole<=5)) return;
+    d.saved = true; registerCustom(d);
+  });
+}
+function saveCurrentCustom(){
+  const d = G.custom;
+  if (!d || d.saved) return;
+  d.saved = true; persistCustoms(); addCustomOption(d); renderCustomSaved();
+  log("Saved “" + d.name + "” to the Game list.", "hl");
+}
+/* the buttons between hands: Next hand, plus Save this game while a custom game is still unsaved */
+async function nextHandWait(){
+  for (;;){
+    const v = await ask(()=>{
+      clearActions(); btn("Next hand", true, "primary");
+      if (G.custom && !G.custom.saved) btn("Save this game", "save", "quiet");
+    });
+    if (v==="save"){ saveCurrentCustom(); continue; }
+    return;
+  }
+}
+/* does this custom game run a buy round at this point? (community: "deal"/"flop"/"turn"/"river"; stud: the card number) */
+function buyAt(stage){ return !!(G.custom && G.custom.buy && G.custom.buy.stage===stage); }
+function buyCost(){ return POLISH_BUY_COST; }   /* every buy-a-card round costs $4 */
+function fillNumSelect(sel, from, to, keep){
+  const cur = keep!==undefined ? keep : +sel.value;
+  sel.innerHTML = "";
+  for (let i=from;i<=to;i++){ const o = document.createElement("option"); o.value = String(i); o.textContent = String(i); sel.appendChild(o); }
+  sel.value = String(Math.max(from, Math.min(to, isNaN(cur) ? from : cur)));
+}
+const CG_WHEN = [["none","None"]].concat(CUSTOM_STAGES);
+function cgFillCount(sel, top, keep){
+  sel.innerHTML = "";
+  for (let i=1;i<=Math.max(1,top);i++){ const o = document.createElement("option"); o.value = String(i); o.textContent = i + (i===1 ? " card" : " cards"); sel.appendChild(o); }
+  const k = +keep; sel.value = String(Math.max(1, Math.min(Math.max(1,top), isNaN(k) ? 1 : k)));
+}
+/* the two discard lines: how many cards each can drop is limited so at least one card is always kept */
+function cgSyncDisc(){
+  const hole = +$("cg-hole").value;
+  cgFillCount($("cg-dn1"), Math.min(3, hole-1), $("cg-dn1").value);
+  const used = $("cg-dw1").value==="none" ? 0 : +$("cg-dn1").value, room = hole - 1 - used;
+  if (room<1) $("cg-dw2").value = "none";
+  $("cg-dw2").disabled = room<1;
+  cgFillCount($("cg-dn2"), Math.min(3, room), $("cg-dn2").value);
+  $("cg-dn1").disabled = $("cg-dw1").value==="none";
+  $("cg-dn2").disabled = $("cg-dw2").value==="none" || room<1;
+}
+function cgUseSet(min, max){
+  const hole = +$("cg-hole").value, top = Math.min(hole, 4);
+  document.querySelectorAll("#cg-use input").forEach(i=>{
+    const n = +i.value; i.disabled = n>top;
+    if (min!==undefined) i.checked = n>=min && n<=Math.min(max,top);
+    else if (n>top) i.checked = false;
+  });
+  if (!document.querySelector("#cg-use input:checked")){ const last = document.querySelector('#cg-use input[value="' + top + '"]'); if (last) last.checked = true; }
+}
+function cgSyncUse(){ cgUseSet(); cgSyncDisc(); }
+function cgFillBuy(stud, keep){
+  const sel = $("cg-buy"); sel.innerHTML = "";
+  const none = document.createElement("option"); none.value = "none"; none.textContent = "No buying"; sel.appendChild(none);
+  buyStagesOf($("cg-base").value).forEach(([k,label])=>{ const o = document.createElement("option"); o.value = String(k); o.textContent = label.charAt(0).toUpperCase() + label.slice(1); sel.appendChild(o); });
+  sel.value = keep!==undefined && keep!==null ? String(keep) : "none";
+}
+/* the low qualifier only shows while one of the two halves is the low hand */
+function cgSyncLow(){
+  const id = $("cg-base").value, dbl = id==="doublestuff" || id==="doublerazz";
+  $("cg-low-row").style.display = (!dbl && ($("cg-half-a").value==="low" || $("cg-half-b").value==="low")) ? "flex" : "none";
+}
+function cgLoadBase(id){
+  const stud = STUD_BASES.indexOf(id)>=0;
+  document.querySelectorAll("#cg-box .cg-comm").forEach(e=>{ e.style.display = stud ? "none" : (e.id==="cg-use-row" ? "block" : "flex"); });
+  if (!stud){
+    const r = HOLE_USE_RANGE[id], plan = DISCARD_GAMES[id] || {};
+    fillNumSelect($("cg-hole"), 2, 5, holeCount(id));
+    cgUseSet(r.min, r.max);
+    const ev = []; CUSTOM_STAGES.forEach(([k])=>{ if (plan[k]) ev.push([k, plan[k]]); });
+    $("cg-dw1").value = ev[0] ? ev[0][0] : "none"; $("cg-dw2").value = ev[1] ? ev[1][0] : "none";
+    cgFillCount($("cg-dn1"), 3, ev[0] ? ev[0][1] : 1); cgFillCount($("cg-dn2"), 3, ev[1] ? ev[1][1] : 1);
+    cgSyncDisc();
+  }
+  $("cg-low").value = id==="crazy8" ? "8" : "any";
+  const dbl = id==="doublestuff" || id==="doublerazz";
+  $("cg-half-row").style.display = $("cg-half-row2").style.display = dbl ? "none" : "flex";
+  $("cg-half-a").value = "high"; $("cg-half-b").value = halfDefaultB(id);
+  cgSyncLow();
+  cgFillBuy(stud, id==="polish" ? 7 : "none");   /* Polish's own trade round is the default: after the 6th card */
+  $("cg-joker").value = "normal";
+  document.querySelectorAll("#cg-wild input").forEach(i=>{ i.checked = false; });
+  document.querySelectorAll("#cg-wild select").forEach(x=>{ x.value = "0"; });
+  $("cg-name").value = ""; $("cg-msg").style.display = "none";
+}
+function cgRead(){
+  const base = $("cg-base").value, stud = STUD_BASES.indexOf(base)>=0;
+  const useOn = [...document.querySelectorAll("#cg-use input:checked")].map(i=>+i.value);
+  const d = { base:base, hole:stud?0:+$("cg-hole").value, min:stud?0:Math.min(...useOn), max:stud?0:Math.max(...useOn), _use:useOn,
+              low: $("cg-low").value==="any" ? "any" : +$("cg-low").value, disc:{}, saved:false, wild:[], buy:null, joker:$("cg-joker").value };
+  if (base!=="doublestuff" && base!=="doublerazz"){ d.halfA = $("cg-half-a").value; d.halfB = $("cg-half-b").value; if (d.halfA==="high" && d.halfB===halfDefaultB(base)){ delete d.halfA; delete d.halfB; } }
+  if (!stud) [["cg-dw1","cg-dn1"],["cg-dw2","cg-dn2"]].forEach(([w,n])=>{ const k = $(w).value; if (k!=="none") d.disc[k] = (d.disc[k]||0) + (+$(n).value); });
+  document.querySelectorAll("#cg-wild .cg-wslot").forEach(row=>{
+    const v = row.querySelector("select").value; if (v==="0") return;
+    const sp = WILD_SPECIAL.filter(x=>x.v===v)[0];
+    if (sp){ sp.cards.forEach(([r,k])=>d.wild.push({r:r, s:k?[k]:[], nm:sp.nm})); return; }
+    const suits = [...row.querySelectorAll("input:checked")].map(i=>i.value);
+    d.wild.push({r:+v, s: suits.length===4 ? [] : suits});
+  });
+  const bv = $("cg-buy").value;
+  if (bv!=="none"){ const hit = buyStagesOf(base).filter(x=>String(x[0])===bv)[0]; if (hit) d.buy = { stage: hit[0], cost: 4 }; }
+  return d;
+}
+function cgProblem(d){
+  if ($("cg-half-a").value===$("cg-half-b").value && $("cg-half-row").style.display!=="none") return "The two halves of the pot can\u2019t go to the same thing.";
+  if (isStudCustom(d)) return "";
+  const total = Object.values(d.disc).reduce((a,b)=>a+b, 0), left = d.hole - total;
+  if (!d._use.length) return "Tick at least one number of cards you may use.";
+  if (d.max-d.min+1 !== d._use.length) return "Tick a continuous range of cards to use (for example 1 and 2, not 0 and 2).";
+  if ($("cg-dw1").value!=="none" && $("cg-dw1").value===$("cg-dw2").value) return "Pick two different times for the two discards.";
+  if (left<1) return "The discards use up all " + d.hole + " cards — leave at least one.";
+  if (left<d.min) return "After the discards you would hold " + left + " card" + (left>1?"s":"") + ", but you must use at least " + d.min + ".";
+  return "";
+}
+function renderCustomSaved(){
+  const box = $("cg-saved"); if (!box) return;
+  box.innerHTML = "";
+  const saved = Object.values(CUSTOM_DEFS).filter(d=>d.saved);
+  if (!saved.length) return;
+  const h = document.createElement("div"); h.textContent = "Saved custom games"; h.style.cssText = "font-size:12px;color:var(--muted);margin-bottom:4px";
+  box.appendChild(h);
+  saved.forEach(d=>{
+    const row = document.createElement("div"); row.style.cssText = "display:flex;gap:6px;align-items:center;margin:4px 0";
+    const t = document.createElement("span"); t.textContent = d.name; t.style.cssText = "flex:1;font-size:13px";
+    const del = document.createElement("button"); del.type = "button"; del.className = "quiet"; del.textContent = "Delete"; del.style.padding = "6px 10px";
+    del.addEventListener("click", ()=>{
+      const wasSelected = $("f-game").value===d.id;
+      unregisterCustom(d.id); persistCustoms(); renderCustomSaved();
+      if (wasSelected){ $("f-game").value = "random"; updateSetupForGame(); }
+    });
+    row.appendChild(t); row.appendChild(del); box.appendChild(row);
+  });
+}
+(function initCustomBuilder(){
+  const base = $("cg-base");
+  CUSTOM_BASES.forEach(id=>{ const o = document.createElement("option"); o.value = id; o.textContent = GAME_TITLES[id]; base.appendChild(o); });
+  const ubox = $("cg-use");
+  for (let n=0;n<=4;n++){
+    const l = document.createElement("label"); l.style.cssText = "display:inline-flex;gap:4px;align-items:center;cursor:pointer";
+    const i = document.createElement("input"); i.type = "checkbox"; i.value = String(n);
+    l.appendChild(i); l.appendChild(document.createTextNode(String(n))); ubox.appendChild(l);
+  }
+  CG_WHEN.forEach(([k,label])=>{ ["cg-dw1","cg-dw2"].forEach(id=>{ const o = document.createElement("option"); o.value = k; o.textContent = label; $(id).appendChild(o); }); });
+  ["cg-dw1","cg-dn1","cg-dw2","cg-dn2"].forEach(id=>$(id).addEventListener("change", cgSyncDisc));
+  const wbox = $("cg-wild");
+  for (let n=1;n<=2;n++){
+    const row = document.createElement("div"); row.className = "cg-wslot"; row.style.cssText = "display:flex;align-items:center;gap:10px;margin:5px 0;flex-wrap:wrap";
+    const t = document.createElement("span"); t.textContent = "Wild card " + n; t.style.cssText = "min-width:74px;color:var(--muted)"; row.appendChild(t);
+    ["s","h","d","c"].forEach(k=>{
+      const l = document.createElement("label"); l.style.cssText = "display:inline-flex;gap:2px;align-items:center;cursor:pointer;font-size:16px" + (k==="h"||k==="d" ? ";color:#e57373" : "");
+      const i = document.createElement("input"); i.type = "checkbox"; i.value = k;
+      l.appendChild(i); l.appendChild(document.createTextNode(SYM[k] + "\uFE0E")); row.appendChild(l);
+    });
+    const sel = document.createElement("select"); sel.style.cssText = "min-width:0;flex:1";
+    const opts = [["0","(none)"]]; for (let r=2;r<=14;r++) opts.push([String(r), RANK_NAMES[r]]); 
+    opts.forEach(([v,l])=>{ const o = document.createElement("option"); o.value = v; o.textContent = l; sel.appendChild(o); });
+    const og = document.createElement("optgroup"); og.label = "Special cards";
+    WILD_SPECIAL.forEach(x=>{ const o = document.createElement("option"); o.value = x.v; o.textContent = x.label; og.appendChild(o); });
+    sel.appendChild(og);
+    /* a special card names its own suits, so the suit boxes step aside */
+    sel.addEventListener("change", ()=>{ const sp = WILD_SPECIAL.some(x=>x.v===sel.value);
+      row.querySelectorAll("input").forEach(i=>{ if (sp) i.checked = false; i.disabled = sp; }); });
+    row.appendChild(sel); wbox.appendChild(row);
+  }
+  [ "cg-half-a", "cg-half-b" ].forEach(id=>{ HALF_CHOICES.forEach(([k,label])=>{ const o = document.createElement("option"); o.value = k; o.textContent = label; $(id).appendChild(o); }); $(id).addEventListener("change", cgSyncLow); });
+  base.value = "omaha";
+  cgLoadBase("omaha");
+  base.addEventListener("change", ()=>cgLoadBase(base.value));
+  $("cg-hole").addEventListener("change", cgSyncUse);
+  $("cg-play").addEventListener("click", ()=>{
+    const d = cgRead(), bad = cgProblem(d), msg = $("cg-msg");
+    if (bad){ msg.textContent = bad; msg.style.display = "block"; return; }
+    msg.style.display = "none"; delete d._use;
+    d.id = "custom:" + Date.now().toString(36);
+    d.name = $("cg-name").value.trim() || customAutoName(d);
+    registerCustom(d);
+    $("f-game").value = d.id;
+    updateSetupForGame();
+    $("btn-start").click();
+  });
+  loadSavedCustoms();
+  renderCustomSaved();
+  updateSetupForGame();
+})();
 
 async function selectionRound(){
   const order = seatOrderFrom((G.button+1)%G.players.length).filter(p=>!p.folded);
@@ -3788,7 +4533,7 @@ function buildPots(){
    (a hole card that improves the five) counts as "beating" it. Other games never reach this: they must use cards. */
 function boardPlayInfo(){
   const r = HOLE_USE_RANGE[G.game];
-  if (!r || r.min!==0 || G.board.length<5) return null;
+  if (!r || r.min!==0 || G.game==="polishholdem" || G.board.length<5) return null;   /* Polish Holdem: playing the board is a plain tie, split */
   let high=-1, low=Infinity;
   combinations(G.board.length,5).forEach(ix=>{
     const five = ix.map(i=>G.board[i]);
@@ -3832,6 +4577,13 @@ function splitAmount(group, amount){
     log("$" + rem + " Rich Pot", "hl");
   }
   return ord.map(p=>({p, got: base}));
+}
+/* Two-half pots (Hi/Lo, Hi/Spade, custom halves) always split evenly: each half is half the pot rounded DOWN, and the
+   odd dollar (if any) goes to the Rich Pot for the next hand. */
+function evenHalves(potAmount){
+  const h = Math.floor(potAmount/2), rem = potAmount - 2*h;
+  if (rem>0){ G.carry = (G.carry||0) + rem; log("$" + rem + " Rich Pot", "hl"); }
+  return h;
 }
 function nameList(ps){
   const names = ps.map(q=>q.name);
@@ -3902,13 +4654,13 @@ function resolvePot(contenders, potAmount, label){
     log(w.name + " " + sv(w,"scoop") + " the " + label + ", $" + potAmount + " \u2014 " + (kickHigh ? "the board, highest hole card " + topHoleCardText(w,"high") : highName(w.finalHand)) + " and " + (kickLow ? "lowest hole card " + topHoleCardText(w,"low") : lowText(w.finalHand) + " low") + ".", "big");
     return;
   }
-  const highHalf = Math.ceil(potAmount/2), lowHalf = potAmount - highHalf;
+  const highHalf = evenHalves(potAmount), lowHalf = highHalf;
   payHalf(highWin, highHalf, "Hi", label, p=> kickHigh ? "the board and the highest hole card, " + topHoleCardText(p,"high") : highName(p.finalHand));
   payHalf(lowWin, lowHalf, "Lo", label, p=> kickLow ? "the board and the lowest hole card, " + topHoleCardText(p,"low") : lowText(p.finalHand) + " low");
 }
 
 /* Double Stuff / Double Razz: rank every live hand (best five of seven, high for Stuff, low for Razz). The two best
-   hands share the pot. One clear best and one clear second: half each, the odd chip to the better hand. A tie for
+   hands share the pot. One clear best and one clear second: half each, the odd dollar to the Rich Pot. A tie for
    second splits the second half; a tie for first (two or more) splits the whole pot among the tied hands, since
    they ARE the two best. Only one live hand in the pot (a side pot) takes it all. */
 function resolveDouble(contenders, potAmount, label, isLow){
@@ -3934,9 +4686,9 @@ function resolveDouble(contenders, potAmount, label, isLow){
   };
   if (t1.length>=2){ pay(t1, potAmount, "a share of"); return; }
   if (!t2){ pay(t1, potAmount, "all of"); return; }
-  const half1 = Math.ceil(potAmount/2);
+  const half1 = evenHalves(potAmount);
   pay(t1, half1, "half of");
-  pay(t2, potAmount-half1, "half of");
+  pay(t2, half1, "half of");
 }
 
 function resolveChicago(contenders, potAmount, label, wantHighest){
@@ -3972,7 +4724,7 @@ function resolveChicago(contenders, potAmount, label, wantHighest){
     return;
   }
 
-  const highHalf = Math.ceil(potAmount/2), spadeHalf = potAmount - highHalf;
+  const highHalf = evenHalves(potAmount), spadeHalf = highHalf;
   splitAmount(highWin, highHalf).forEach(({p,got:hs})=>{ p.stack+=hs; p.winner=true; p.wonHigh=true;
     log(p.name + " " + sv(p,"take") + " half the " + label + ", $" + hs + ", with " + highName(p.finalHand) + ".", "big"); });
   spadeWinner.stack += spadeHalf; spadeWinner.winner=true; spadeWinner.wonSpade=spadeCard;
@@ -3981,7 +4733,7 @@ function resolveChicago(contenders, potAmount, label, wantHighest){
 
 function resolve(){ resolveCore(); try { recordHand(); } catch(e){ console.error(e); } }
 function resolveCore(){
-  G.players.forEach(p=>{ p.wonHigh=false; p.wonSpade=null; });   /* Little Chicago / Moriah: which half each player takes is recorded below */
+  G.players.forEach(p=>{ p.wonHigh=false; p.wonSpade=null; p.halfWon=[]; });   /* Little Chicago / Moriah: which half each player takes is recorded below */
   const contenders = active();
   const pots = buildPots();
   const total = pots.reduce((s,pt)=>s+pt.amount, 0);
@@ -3996,7 +4748,8 @@ function resolveCore(){
   pots.forEach((pt,i)=>{
     const label = pots.length===1 ? "pot" : (i===0 ? "main pot" : (pots.length===2 ? "side pot" : "side pot " + i));
     const field = pt.eligible.length ? pt.eligible : contenders;
-    if (isChicagoFamily(G.game)) resolveChicago(field, pt.amount, label, G.game==="chicago");
+    if (halfCrit()) resolveHalves(field, pt.amount, label, halfCrit());
+    else if (isChicagoFamily(G.game)) resolveChicago(field, pt.amount, label, G.game==="chicago");
     else if (isDoubleGame(G.game)) resolveDouble(field, pt.amount, label, G.game==="doublerazz");
     else resolvePot(field, pt.amount, label);
   });
@@ -4023,7 +4776,7 @@ async function playHand(){
 
 /* ============================ Polish Poker ============================ */
 /* Three down and a bet; then cards 4, 5 and 6 each come down, everybody flips one of their down cards up, and
-   there is a bet. After that anybody still in may pay POLISH_BUY_COST to trade one of their six cards for a new one
+   there is a bet. After that anybody still in may pay buyCost() to trade one of their six cards for a new one
    (dealt the same way as the card given up: an up card is replaced up, a down card down). Then POLISH_FINAL_BET (a last betting round, which the
    user said he may remove later), the declare, and the showdown. The hand is the best five of six. */
 const POLISH_BUY_COST = 4;
@@ -4032,9 +4785,10 @@ function studFinalSize(){ return G.game==="polish" ? 6 : 7; }
 /* A bot buys when a random replacement card, swapped in for its worst-fitting card, raises its hand's prospects by
    enough to be worth $4 of a pot that size. The new card is dealt the same way (up/down) as the card it gives up. */
 function botBuyChoice(p){
-  if (p.stack < POLISH_BUY_COST) return null;
+  if (p.stack < buyCost()) return null;
   const pool = unseenCards(p);
   if (!pool.length) return null;
+  if (isCommunityFamily(G.game)) return botBuyChoiceCommunity(p, pool);
   const pH = c => Math.min(0.97, (evalHighFull(c).cat/8)*0.75 + 0.15);
   const pL = c => lowQualifies(c) ? lowWinChance(c) : 0;
   const score = c => { const hv=pH(c), lv=pL(c); return Math.max(hv,lv) + 0.35*Math.min(hv,lv); };
@@ -4051,28 +4805,66 @@ function botBuyChoice(p){
   }
   const gain = bestAvg - cur;
   const noise = (Math.random()-0.5) * (6-CFG.skill) * 0.6;
-  return (gain * G.pot * 0.6 + noise > POLISH_BUY_COST) ? { idx:bestIdx } : null;
+  return (gain * G.pot * 0.6 + noise > buyCost()) ? { idx:bestIdx } : null;
+}
+/* community games: judge each possible swap over a few random finishes of the board */
+function botBuyChoiceCommunity(p, pool){
+  const known = G.board.slice(0,5), need = 5-known.length;
+  const key = c => c.joker ? "J" : c.r+c.s;
+  const boards = [];
+  const bpool = pool.filter(c=>!p.cards.some(h=>key(h)===key(c)));
+  for (let t=0;t<6;t++){
+    const copy = bpool.slice(), add = [];
+    for (let k=0;k<need && copy.length;k++) add.push(copy.splice(Math.floor(Math.random()*copy.length),1)[0]);
+    boards.push(known.concat(add));
+  }
+  const pH = c => Math.min(0.97, (evalHighFull(c).cat/9)*0.75 + 0.15);
+  const pL = c => lowQualifies(c) ? lowWinChance(c) : 0;
+  const score = hole => { let tot = 0; boards.forEach(b=>{ const hi = bestForHigh(hole, b), lo = bestForLow(hole, b); const hv = hi?pH(hi.combo):0, lv = lo?pL(lo.combo):0; tot += Math.max(hv,lv)+0.35*Math.min(hv,lv); }); return tot/boards.length; };
+  const cur = score(p.cards);
+  let bestIdx = -1, bestAvg = -Infinity;
+  for (let i=0;i<p.cards.length;i++){
+    let tot = 0; const n = 5;
+    for (let t=0;t<n;t++){
+      const nc = bpool[Math.floor(Math.random()*bpool.length)];
+      const hand = p.cards.slice(); hand[i] = nc;
+      tot += score(hand);
+    }
+    if (tot/n > bestAvg){ bestAvg = tot/n; bestIdx = i; }
+  }
+  const gain = bestAvg - cur;
+  const noise = (Math.random()-0.5) * (6-CFG.skill) * 0.6;
+  return (gain * G.pot * 0.6 + noise > buyCost()) ? { idx:bestIdx } : null;
 }
 async function buyRound(){
   const order = seatOrderFrom((G.button+1)%G.players.length).filter(p=>!p.folded && !p.out);
   if (order.length<2) return;
-  log("— trade a card for $" + POLISH_BUY_COST + "? —", "hl");
+  log("— trade a card for $" + buyCost() + "? —", "hl");
   G.players.forEach(p=>{ if (!p.folded) p.status=""; });
   render();
   for (const p of order){
     G.acting = p.id; render();
     let choice = null;
     if (p.human){
-      if (p.stack < POLISH_BUY_COST){ log("You can't afford a card."); continue; }
-      prompt("Pay $" + POLISH_BUY_COST + " to trade one of your cards for a new one?");
-      const buy = await ask(()=>{ clearActions(); btn("Trade a card ($" + POLISH_BUY_COST + ")", "buy", "primary"); btn("No thanks", "no"); });
+      if (p.stack < buyCost()){ log("You can't afford a card."); continue; }
+      prompt("Pay $" + buyCost() + " to trade one of your cards for a new one?");
+      const buy = await ask(()=>{ clearActions(); btn("Trade a card ($" + buyCost() + ")", "buy", "primary"); btn("No thanks", "no"); });
       if (buy==="buy"){
-        const all = p.cards.map((c,i)=>i);
-        const idx = await ask(()=>{
-          clearActions();
-          prompt("Click the card you want to trade away. You get a new card the same way (up for up, down for down).");
-          G.pickMode = true; G.pickFilter = all; render();
-        }).then(v => v && v.type==="pick" ? v.idx : 0);
+        let idx = 0;
+        if (isCommunityFamily(G.game)){
+          G.discardMode = { need:1, sel:[] };
+          prompt("Click the card you want to trade away, then confirm. You get a new card.");
+          render();
+          await ask(()=>{ clearActions(); const b = btn("Trade it", true, "primary"); b.disabled = true; });
+          idx = G.discardMode.sel[0]; G.discardMode = null;
+        } else {
+          const all = p.cards.map((c,i)=>i);
+          idx = await ask(()=>{
+            clearActions();
+            prompt("Click the card you want to trade away. You get a new card the same way (up for up, down for down).");
+            G.pickMode = true; G.pickFilter = all; render();
+          }).then(v => v && v.type==="pick" ? v.idx : 0);
+        }
         choice = { idx };
       }
     } else {
@@ -4085,17 +4877,17 @@ async function buyRound(){
       render();
       continue;
     }
-    toPot(p, POLISH_BUY_COST, false);
+    toPot(p, buyCost(), false);
     const old = p.cards[choice.idx];
     const nc = draw(); nc.up = old.up;
     p.cards[choice.idx] = nc;
     if (old.up) G.dead.push(old); else p.muck.push(old);
     p.status = "traded a card";
     if (p.stack<=0) p.allIn = true;
-    log(p.name + " " + sv(p,"pay") + " $" + POLISH_BUY_COST + " and " + sv(p,"trade") + " away " +
+    log(p.name + " " + sv(p,"pay") + " $" + buyCost() + " and " + sv(p,"trade") + " away " +
         ((old.up || p.human) ? cardText(old) + (old.up?" (face up)":"") : "a down card") + " for a new card, " + (nc.up?"face up: " + cardText(nc):"face down") + ".", "hl");
     if (p.human && !nc.up) log("You take " + cardText(nc) + ".", "hl");
-    render();
+    render(); slideCard(p, nc);
     await sleep(900);
   }
   G.acting = null;
@@ -4119,14 +4911,16 @@ async function playHandPolish(){
   log("— hand " + G.handNo + ", " + G.players[G.button].name + " deals —", "big");
   if (G.carryIn>0) log("$" + G.carryIn + " Rich Pot", "hl");
 
-  inHand().forEach(p=>{ for (let i=0;i<3;i++){ const c=draw(); c.up=false; p.cards.push(c); } });
+  await dealHoleCards(3, ()=>{ const c=draw(); c.up=false; return c; });
   render();
   prompt("Three down to everybody.");
   await sleep(1400);
   await bettingRound({firstRound:true});
 
   for (let street=4; street<=6 && active().length>1; street++){
-    active().forEach(p=>{ const c=draw(); c.up=false; p.cards.push(c); });
+    if (buyAt(street)) await buyRound();
+    if (active().length<2) break;
+    await dealRoundTo(active(), ()=>{ const c=draw(); c.up=false; return c; });
     render();
     log("— card " + street + " —", "hl");
     prompt("Card " + street + ", down. Flip one of your down cards face up.");
@@ -4136,13 +4930,15 @@ async function playHandPolish(){
     await bettingRound({firstRound:false});
   }
 
-  if (active().length>1){
+  /* a custom Polish game can move the buy (or drop it); the standard game buys here, then has a last bet */
+  const polishBuyHere = !(G.custom && G.custom.base==="polish") || buyAt(7);
+  if (active().length>1 && polishBuyHere){
     await buyRound();
     if (POLISH_FINAL_BET && active().length>1) await bettingRound({firstRound:false});
   }
 
   active().forEach(p=>{ p.finalHand = p.cards; });
-  if (active().length>1) await declareRound();
+  if (active().length>1 && !halfCrit()) await declareRound();
 
   G.showdown = true;
   G.acting = null;
@@ -4156,7 +4952,7 @@ async function playHandPolish(){
 
   prompt(handOverText());
   setBetweenHands(true);
-  await ask(()=>{ clearActions(); btn("Next hand", true, "primary"); });
+  await nextHandWait();
   setBetweenHands(false);
   startHand();
 }
@@ -4169,7 +4965,7 @@ async function playHandStud(){
   G.players.forEach(p=>{
     p.cards=[]; p.folded=p.out; p.bet=0; p.committed=0;
     p.acted=false; p.checked=false; p.status=""; p.declare=null; p.declared=false; p.traded=false; p.allIn=false; p.winner=false;
-    p.finalHand=null;
+    p.finalHand=null; p.muck=[];
     if (p.stack<=0) { p.out=true; p.folded=true; }
   });
   $("log").innerHTML="";
@@ -4180,10 +4976,7 @@ async function playHandStud(){
   log("\u2014 hand " + G.handNo + ", " + G.players[G.button].name + " deals \u2014", "big");
   if (G.carryIn>0) log("$" + G.carryIn + " Rich Pot", "hl");
 
-  inHand().forEach(p=>{
-    const c1=draw(); c1.up=false; const c2=draw(); c2.up=false;
-    p.cards.push(c1,c2);
-  });
+  await dealHoleCards(2, ()=>{ const c=draw(); c.up=false; return c; });
   render();
   prompt("Two down to everybody.");
   await sleep(1400);
@@ -4191,10 +4984,9 @@ async function playHandStud(){
 
   const rollYourOwn = G.game==="studroll";
   for (let street=3; street<=6 && active().length>1; street++){
-    active().forEach(p=>{
-      const c=draw(); c.up = !rollYourOwn;
-      p.cards.push(c);
-    });
+    if (buyAt(street)) await buyRound();
+    if (active().length<2) break;
+    await dealRoundTo(active(), ()=>{ const c=draw(); c.up = !rollYourOwn; return c; });
     render();
     log("\u2014 card " + street + " \u2014", "hl");
     if (rollYourOwn){
@@ -4209,8 +5001,9 @@ async function playHandStud(){
     await bettingRound({firstRound:false});
   }
 
+  if (active().length>1 && buyAt(7)) await buyRound();
   if (active().length>1){
-    active().forEach(p=>{ const c=draw(); c.up=false; p.cards.push(c); });
+    await dealRoundTo(active(), ()=>{ const c=draw(); c.up=false; return c; });
     render();
     log("\u2014 the last card \u2014", "hl");
     prompt("Last card, down\u2014it stays that way.");
@@ -4220,7 +5013,7 @@ async function playHandStud(){
 
   active().forEach(p=>{ p.finalHand = p.cards; });
   if (isDoubleGame(G.game)) active().forEach(p=>{ p.declare = G.game==="doublerazz" ? "low" : "high"; });   /* nobody declares -- everyone plays the one way */
-  if (active().length>1 && !isChicagoFamily(G.game) && !isDoubleGame(G.game)){
+  if (active().length>1 && !isChicagoFamily(G.game) && !isDoubleGame(G.game) && !halfCrit()){
     await declareRound();
   }
 
@@ -4236,7 +5029,7 @@ async function playHandStud(){
 
   prompt(handOverText());
   setBetweenHands(true);
-  await ask(()=>{ clearActions(); btn("Next hand", true, "primary"); });
+  await nextHandWait();
   setBetweenHands(false);
   startHand();
 }
@@ -4249,7 +5042,7 @@ async function playHandHesitation(){
   G.players.forEach(p=>{
     p.cards=[]; p.folded=p.out; p.bet=0; p.committed=0;
     p.acted=false; p.checked=false; p.status=""; p.declare=null; p.declared=false; p.traded=false; p.allIn=false; p.winner=false;
-    p.finalHand=null;
+    p.finalHand=null; p.muck=[];
     if (p.stack<=0) { p.out=true; p.folded=true; }
   });
   $("log").innerHTML="";
@@ -4260,11 +5053,12 @@ async function playHandHesitation(){
   log("\u2014 hand " + G.handNo + ", " + G.players[G.button].name + " deals \u2014", "big");
   if (G.carryIn>0) log("$" + G.carryIn + " Rich Pot", "hl");
 
-  inHand().forEach(p=>{ const c=draw(); c.up=false; p.cards.push(c); });
+  await dealHoleCards(1, ()=>{ const c=draw(); c.up=false; return c; });
   render();
   prompt("One down to everybody.");
   await sleep(1400);
-  await bettingRound({firstRound:true});
+  /* No betting after the down card: the first pass round comes first, and the first betting round follows it
+     (the player showing the best card opens, the same as every later round). */
 
   for (let r=0; r<4; r++){
     if (active().length<2) break;
@@ -4272,6 +5066,7 @@ async function playHandHesitation(){
     log("\u2014 pass round " + (r+1) + " \u2014");
     await (USE_CATCHUP_PASS_ROUND ? passRoundCatchup(r) : passRound(r));
     if (active().length<2) break;
+    if (buyAt("pass"+(r+1))){ await buyRound(); if (active().length<2) break; }
     await bettingRound({firstRound:false});
   }
 
@@ -4280,8 +5075,9 @@ async function playHandHesitation(){
     await tradeRound();
     await bettingRound({firstRound:false});
   }
+  if (active().length>1 && buyAt("end")) await buyRound();
   active().forEach(p=>{ p.finalHand = p.cards; });
-  if (active().length>1){
+  if (active().length>1 && !halfCrit()){
     await declareRound();
   }
 
@@ -4297,15 +5093,85 @@ async function playHandHesitation(){
 
   prompt(handOverText());
   setBetweenHands(true);
-  await ask(()=>{ clearActions(); btn("Next hand", true, "primary"); });
+  await nextHandWait();
   setBetweenHands(false);
   startHand();
+}
+
+/* ============================ dealing ============================ */
+/* Cards are dealt one at a time with a short slide from the middle of the table. Menu "Dealing": Normal / Fast / Off.
+   Off (delay 0) keeps the old behaviour exactly: everything is added and drawn once. Built for the Omaha-style games so far. */
+const DEAL_MS = { slow:220, normal:110, fast:55, off:0 };
+function dealDelay(){ const v = DEAL_MS[CFG.dealSpeed]; return v===undefined ? DEAL_MS.slow : v; }
+function slideIn(el){
+  if (!el || !el.animate || !dealDelay()) return;
+  try{
+    const felt = document.querySelector(".felt"); if (!felt) return;
+    const o = felt.getBoundingClientRect(), r = el.getBoundingClientRect();
+    const sc = seatScale()||1;
+    const dx = ((o.left+o.width/2) - (r.left+r.width/2)) / sc, dy = ((o.top+o.height/2) - (r.top+r.height/2)) / sc;
+    const ms = Math.max(50, dealDelay()*0.95);
+    el.animate([{ transform:"translate("+dx+"px,"+dy+"px) scale(.5) rotate(-10deg)", opacity:0.15 },
+                { transform:"none", opacity:1 }], { duration:ms, easing:"cubic-bezier(.2,.7,.3,1)" });
+  }catch(e){}
+}
+/* find the on-screen element of a card in a player's hand (render tags each one with _c) */
+function findCardEl(p, card){
+  const seat = document.querySelector('#seats .seat[data-pid="'+p.id+'"]');
+  if (!seat) return null;
+  const els = seat.querySelectorAll(".hand .card");
+  for (const e of els) if (e._c === card) return e;
+  return null;
+}
+function slideCard(p, card){ slideIn(findCardEl(p, card)); }
+/* One card to each player in the list, going round the table clockwise from the player left of the dealer.
+   make(p) returns the card to give that player. Delay 0 = everything at once (caller renders). */
+async function dealRoundTo(list, make){
+  const order = seatOrderFrom((G.button+1)%G.players.length).filter(p=>list.indexOf(p)>=0);
+  if (!dealDelay()){ order.forEach(p=>{ p.cards.push(make(p)); }); return; }
+  for (const p of order){
+    const c = make(p);
+    p.cards.push(c);
+    render();
+    slideCard(p, c);
+    await sleep(dealDelay());
+  }
+}
+/* count cards to everybody, round after round, starting left of the dealer */
+async function dealHoleCards(count, mk){
+  const make = mk || (()=>draw());
+  const list = inHand();
+  if (dealDelay()) prompt("Dealing\u2026");
+  for (let i=0;i<count;i++) await dealRoundTo(list, make);
+}
+/* the five face-down board slots, dealt left to right after the players' cards (community games only) */
+async function dealBoardBacks(){
+  if (!dealDelay()){ G.boardSlots = 5; return; }
+  G.boardSlots = 0;
+  for (let i=0;i<5;i++){
+    G.boardSlots = i+1;
+    render();
+    const b = $("board");
+    slideIn(b ? b.children[i] : null);
+    await sleep(dealDelay());
+  }
+}
+/* community cards, one at a time, left to right */
+async function dealBoard(count){
+  if (!dealDelay()){ for (let i=0;i<count;i++) G.board.push(draw()); render(); return; }
+  for (let i=0;i<count;i++){
+    G.board.push(draw());
+    render();
+    const b = $("board");
+    slideIn(b ? b.children[G.board.length-1] : null);
+    await sleep(dealDelay() * (count>1 ? 1.6 : 1));
+  }
 }
 
 async function playHandCrazy8(){
   G.handNo++;
   G.deck = shuffle(newDeck());
-  G.pot = G.carry||0; G.carryIn = G.pot; G.carry = 0; G.dead=[]; G.board=[]; G.showdown=false; G.declareRevealed=false; G.declarePhase=false; G.handPickMode=false;
+  G.pot = G.carry||0; G.carryIn = G.pot; G.carry = 0; G.dead=[]; G.board=[]; G.boardSlots=undefined; G.showdown=false; G.declareRevealed=false; G.declarePhase=false; G.handPickMode=false;
   G._oddsCacheC8 = null; G.offer=null; G.offerTo=null; G.passedLog=[]; G.discardMode=null;
   G.players.forEach(p=>{
     p.cards=[]; p.folded=p.out; p.bet=0; p.committed=0;
@@ -4321,55 +5187,58 @@ async function playHandCrazy8(){
   log("\u2014 hand " + G.handNo + ", " + G.players[G.button].name + " deals \u2014", "big");
   if (G.carryIn>0) log("$" + G.carryIn + " Rich Pot", "hl");
 
-  inHand().forEach(p=>{ for (let i=0;i<holeCount(G.game);i++) p.cards.push(draw()); });
   G.bloodBanner = CFG.bloodInWater || CFG.oilInWater; /* the banner stays until the first bet, check or fold */
+  if (dealDelay()) G.boardSlots = 0;
+  await dealHoleCards(holeCount(G.game));
+  await dealBoardBacks();
   render();
-  prompt((holeCount(G.game)===5?"Five":"Four") + " down to everybody.");
-  await sleep(1400);
+  prompt(NUM_WORDS[holeCount(G.game)] + " down to everybody.");
+  await sleep(dealDelay() ? 500 : 1400);
   await discardRound("deal");
+    if (buyAt("deal")) await buyRound();
   await bettingRound({stageName:"pre-flop"});
 
   if (active().length>1){
-    for (let i=0;i<3;i++) G.board.push(draw());
-    render();
     log("\u2014 the flop \u2014", "hl");
     prompt("The flop.");
-    await sleep(1300);
+    await dealBoard(3);
+    await sleep(dealDelay() ? 600 : 1300);
     await discardRound("flop");
+    if (buyAt("flop")) await buyRound();
     await bettingRound({stageName:"flop"});
   }
   if (active().length>1){
-    G.board.push(draw());
-    render();
     log("\u2014 the turn \u2014", "hl");
     prompt("The turn.");
-    await sleep(1300);
+    await dealBoard(1);
+    await sleep(dealDelay() ? 600 : 1300);
     await discardRound("turn");
+    if (buyAt("turn")) await buyRound();
     await bettingRound({stageName:"turn"});
   }
   if (active().length>1){
-    G.board.push(draw());
-    render();
     log("\u2014 the river \u2014", "hl");
     prompt("The river.");
-    await sleep(1300);
+    await dealBoard(1);
+    await sleep(dealDelay() ? 600 : 1300);
+    await discardRound("river");
+    if (buyAt("river")) await buyRound();
     await bettingRound({stageName:"river"});
   }
 
   if (active().length>1 && bloodPending()){
     const water = extraCardKind()==="oil" ? "oil" : "blood";
     log("\u2014 " + water + " in the water! " + cardText(G.board[4]) + " \u2014", "big");
-    G.board.push(draw());
-    render();
     log("\u2014 a sixth community card \u2014", "hl");
     prompt((water==="oil" ? "Oil" : "Blood") + " in the water \u2014 one more community card.");
-    await sleep(1300);
+    await dealBoard(1);
+    await sleep(dealDelay() ? 600 : 1300);
     await bettingRound({stageName:water + " in the water"});
   }
 
   if (active().length>1){
-    await selectionRound();
-    await declareRound();
+    if (halfCrit()) autoHalvesHands();
+    else { await selectionRound(); await declareRound(); }
   } else if (active().length===1){
     const o = bestOverall(active()[0].cards, G.board);
     if (o){ active()[0].finalHand = o.combo; active()[0].locked = true; }
@@ -4387,7 +5256,7 @@ async function playHandCrazy8(){
 
   prompt(handOverText());
   setBetweenHands(true);
-  await ask(()=>{ clearActions(); btn("Next hand", true, "primary"); });
+  await nextHandWait();
   setBetweenHands(false);
   startHand();
 }
