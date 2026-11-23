@@ -932,7 +932,6 @@
     <div>
       <ul>
         <li>Three cards down to everybody (Texas Hold’em deals two), then a betting round.</li>
-        <li><b>Turn one up.</b> After that first bet, everybody turns one of their three cards face up, in turn, left of the dealer. A face-up card is still part of your hand.</li>
         <li>The flop: three community cards, then a betting round.</li>
         <li>The turn: one more community card, then a betting round.</li>
         <li>The river: one more community card (five total), then a final betting round.</li>
@@ -2180,7 +2179,7 @@ const BLURB = {
   aruba: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody and a bet, then the flop. Right after the flop everybody discards one card face down and bets again. Then the turn, another discard down to two cards, and a bet. Then the river and a final bet. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   bermuda: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody, and before any betting everybody discards one card face down, then bets. Then the flop, another discard down to two cards, and a bet. Then the turn and river, with a bet after each. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   caribbean: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody and a bet, then the flop. Right after the flop everybody discards two cards face down, keeping two, and bets again. Then the turn and river, with a bet after each. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
-  polishholdem: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody and a bet, then everybody turns one of their three cards face up, then the flop and a bet, the turn and a bet, the river and a final bet \u2014 just like Texas Hold\u2019em, but with three hole cards instead of two. At the end use 0, 1 or 2 of your three cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
+  polishholdem: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody and a bet, then the flop and a bet, the turn and a bet, the river and a final bet \u2014 just like Texas Hold\u2019em, but with three hole cards instead of two. At the end use 0, 1 or 2 of your three cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   polish: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody, then a bet. Then everybody flips one of their three cards face up. Then a fourth card down and you flip one of your four face up, and a bet. Same again with the fifth card and the sixth, so you finish with six cards, four up and two down. Then each player still in may pay $4 to trade one of their cards for a new one (a face-up card is replaced face up, a face-down card face down), followed by a final bet. Your hand is the best five of your six cards, and you declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   doublestufforeo: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Exactly like Double Stuff \u2014 two down, four up one at a time and a seventh down, no declare, everybody plays high, and the two best hands split the pot \u2014 except that after the seventh card, before the final bet, each player still in may pay $4 to trade one of their seven cards for a new one.",
   doublestuff: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Dealt and bet like 7 Card Stud: two down, then four up one at a time and a seventh down, with a bet after each. No declare \u2014 everybody plays high, best five of seven, and the two best hands split the pot.",
@@ -2207,7 +2206,7 @@ const TAG = {
   aruba: "Four cards down, then discard one after the flop and one after the turn. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
   bermuda: "Four cards down, discard one before the first bet and one after the flop. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
   caribbean: "Four cards down, then discard two after the flop. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
-  polishholdem: "Three cards down, a bet, turn one face up, then flop, turn and river like Texas Hold\u2019em. Use 0, 1 or 2 of your three cards. Set your own low qualifier below.",
+  polishholdem: "Three cards down, a bet, then flop, turn and river like Texas Hold\u2019em. Use 0, 1 or 2 of your three cards. Set your own low qualifier below.",
   polish: "Three down, then a card at a time \u2014 flip one up after the first bet and again each round until you hold six, four up and two down. Pay $4 to trade one card for a new one. Set your own low qualifier below.",
   doublestufforeo: "Double Stuff with a $4 buy: after the seventh card, before the final bet, you may pay $4 to trade one of your cards for a new one. Two best hands split the pot.",
   doublestuff: "7 Card Stud with no declare \u2014 everybody plays high, and the two best hands split the pot.",
@@ -5217,34 +5216,6 @@ async function dealBoard(count){
   }
 }
 
-/* Polish Holdem: after the first bet everybody turns one of their three cards face up (the flop, turn and river then go as in
-   any hold'em game). A face-up hole card is still part of your hand: you may use 0, 1 or 2 of your three cards. */
-async function holdemFlipRound(){
-  const order = seatOrderFrom((G.button+1)%G.players.length).filter(p=>!p.folded && !p.out);
-  log("\u2014 turn one card face up \u2014", "hl");
-  for (const p of order){
-    G.acting = p.id; render();
-    const all = p.cards.map((c,i)=>i);
-    let idx;
-    if (p.human){
-      G.discardMode = { need:1, sel:[] };
-      prompt("Click one of your three cards to turn it face up, then confirm.");
-      render();
-      await ask(()=>{ clearActions(); const b = btn("Turn it up", true, "primary"); b.disabled = true; });
-      idx = G.discardMode.sel[0]; G.discardMode = null;
-    } else {
-      await botPause();
-      idx = botRollChoice(p, all);
-    }
-    const c = p.cards[idx];
-    c.up = true;
-    p.status = "flipped " + cardText(c) + " up";
-    log(p.name + " " + sv(p,null,["flip","flips"]) + " " + cardText(c) + " face up.", "hl");
-    render();
-    await sleep(900);
-  }
-  G.acting = null; render();
-}
 async function playHandCrazy8(){
   G.handNo++;
   G.deck = shuffle(newDeck());
@@ -5274,7 +5245,6 @@ async function playHandCrazy8(){
   await discardRound("deal");
     if (buyAt("deal")) await buyRound();
   await bettingRound({stageName:"pre-flop"});
-  if (G.game==="polishholdem" && active().length>1) await holdemFlipRound();
 
   if (active().length>1){
     log("\u2014 the flop \u2014", "hl");
