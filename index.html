@@ -519,12 +519,14 @@
       <option value="insane">Insane</option>
       <option value="omaha">Omaha Hi/Lo</option>
       <option value="omaha5">5 Card Omaha Hi/Lo</option>
+      <option value="omaha3">3 Card Omaha Hi/Lo</option>
       <option value="little">Little Omaha Hi/Lo</option>
       <option value="bigjohnson">Big Johnson Omaha Hi/Lo</option>
       <option value="giant">Giant Omaha Hi/Lo</option>
       <option value="ultimate">Ultimate Omaha Hi/Lo</option>
       <option value="studhilo">7 Card Stud Hi/Lo</option>
       <option value="studroll">7 Card Stud Roll Your Own Hi/Lo</option>
+      <option value="stud6">6 Card Stud Hi/Lo</option>
       <option value="chicago">Little Chicago</option>
       <option value="moriah">Moriah</option>
       <option value="aruba">Aruba</option>
@@ -533,6 +535,7 @@
       <option value="polish">Polish Poker</option>
       <option value="polishholdem">Polish Holdem</option>
       <option value="doublestuff">Double Stuff</option>
+      <option value="doublestufforeo">Double Stuff Oreo</option>
       <option value="doublerazz">Double Razz</option>
       <option value="random" selected>Random</option>
     </select></div>
@@ -569,6 +572,9 @@
       <option value="random">Random (75% none, 12.5% Blood, 12.5% Oil)</option>
     </select></div>
 
+  <div class="field" id="row-bank" style="display:none"><label for="f-bank">Your chips</label>
+    <select id="f-bank"></select></div>
+
   <button class="primary start" id="btn-start">Deal the first hand</button>
   <button class="quiet" id="btn-settings" type="button" style="display:none;margin-top:12px;width:100%;padding:10px">&#9881; Settings</button>
   <div id="settings-panel" style="display:none;margin-top:12px">
@@ -595,6 +601,12 @@
       <option value="normal">Normal &mdash; cards are dealt one at a time</option>
       <option value="fast">Fast</option>
       <option value="off">Off &mdash; cards appear at once</option>
+    </select></div>
+
+  <div class="field" id="row-bankleave"><label for="f-bankleave">Leaving mid-hand</label>
+    <select id="f-bankleave">
+      <option value="forfeit" selected>Forfeit the chips in the pot, keep the rest (default)</option>
+      <option value="lasthand">Keep my chips from the last finished hand</option>
     </select></div>
 
     <div class="field" id="cg-box" style="display:block;border-top:1px solid #2a443c;margin-top:14px;padding-top:12px">
@@ -826,6 +838,24 @@
     </div>
   </details>
 
+  <details class="rules" id="rules-omaha3" style="display:none"><summary>How 3 Card Omaha Hi/Lo is played</summary>
+    <div>
+      <ul>
+        <li>Three cards down to everybody, then a betting round.</li>
+        <li>The flop: three community cards, then a betting round.</li>
+        <li>The turn: one more community card, then a betting round.</li>
+        <li>The river: one more community card (five total), then a final betting round.</li>
+        <li><b>The split.</b> Use 1 or 2 of your own three cards, plus the matching number of community cards (4 or 3), to make your best 5-card hand. Not a fixed 2 like standard Omaha. There's no discard in this game.</li>
+        <li>Once the river's out, everyone picks their combination — the game suggests the strongest one it can find, and you can change it before locking it in.</li>
+        <li><b>The declare.</b> Everyone puts a hand down face down, in their own time. Once all are down, they turn up together: high, low, or both. Highs play against highs, lows against lows, and the pot splits. Declare both and you must win both, or you forfeit the whole thing to the next-best high and low.</li>
+        <li><b>Low hands.</b> By default any five cards can be a low: a hand with no pair beats one pair, which beats two pair, and so on, and lower cards win within each. If you set a limit on the main menu (9, 8 or 7 or better), a low needs five cards of different rank, no pairs, all at or under that limit. If nobody has a low that counts, high takes the whole pot.</li>
+        <li><b>The joker.</b> Plays as an ace, or as any card that completes a straight or a flush, for high. For low, it can stand in as any rank ace through 8, whichever helps most — never higher, even under "any low qualifies".</li>
+        <li>Action starts left of the dealer every round — nothing's visible before showdown, so there's no "best hand acts first" the way Hesitation plays it.</li>
+        <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
+      </ul>
+    </div>
+  </details>
+
   <details class="rules" id="rules-bigjohnson" style="display:none"><summary>How Big Johnson Omaha Hi/Lo is played</summary>
     <div>
       <ul>
@@ -897,6 +927,23 @@
     </div>
   </details>
 
+  <details class="rules" id="rules-stud6" style="display:none"><summary>How 6 Card Stud Hi/Lo is played</summary>
+    <div>
+      <ul>
+        <li>One card down to everybody, then a betting round.</li>
+        <li>Four more cards come up, one at a time, with a betting round after each.</li>
+        <li>Right after the fifth card, before its betting round, you can pay $4 to trade one of your cards for a new one (an up card is replaced up, a down card down). Then everybody bets.</li>
+        <li>The sixth and last card comes down and stays hidden, then a final betting round before the declare.</li>
+        <li>No discard, no community cards — just your own six cards, two down and four up.</li>
+        <li><b>The declare.</b> Everyone puts a hand down face down, in their own time. Once all are down, they turn up together: high, low, or both. Highs play against highs, lows against lows, and the pot splits, using whichever 5 of your 6 cards make your best hand for each. Declare both and you must win both, or you forfeit the whole thing to the next-best high and low.</li>
+        <li><b>Low hands.</b> By default any five cards can be a low: a hand with no pair beats one pair, which beats two pair, and so on, and lower cards win within each. If you set a limit on the main menu (9, 8 or 7 or better), a low needs five cards of different rank, no pairs, all at or under that limit. If nobody has a low that counts, high takes the whole pot.</li>
+        <li><b>The joker.</b> Plays as an ace, or as any card that completes a straight or a flush, for high. For low, it can stand in as any rank ace through 8, whichever helps most — never higher, even under "any low qualifies".</li>
+        <li>Whoever's showing the best hand acts first each betting round, same as Hesitation.</li>
+        <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
+      </ul>
+    </div>
+  </details>
+
   <details class="rules" id="rules-studroll" style="display:none"><summary>How 7 Card Stud Roll Your Own Hi/Lo is played</summary>
     <div>
       <ul>
@@ -922,7 +969,8 @@
         <li><b>No declare, and no low hand at all.</b> The pot always splits automatically between two things: the best 5-card high hand (best 5 of your 7), and whoever holds the highest spade among their hole cards specifically — the two down cards you started with, plus the seventh card, which also stays down. Up cards never count toward this, no matter how good they are.</li>
         <li><b>The Ace of Spades is the best card in the hole</b> for this game — if you're holding it down, nobody can beat you for that half of the pot.</li>
         <li>If one player wins both halves, they scoop the whole pot. If nobody has any spade in the hole at all, the high hand takes the entire pot instead.</li>
-        <li><b>The joker.</b> Plays as an ace, or as any card that completes a straight or a flush, for the high hand. In the hole it counts as the best spade possible for the hole-card side of the pot — the highest spade (above the A♠) in Little Chicago.</li>
+        <li><b>The joker.</b> Plays as an ace, or as any card that completes a straight or a flush, for the high hand. It is never a spade, so it can't be the high spade for the hole-card side of the pot.</li>
+        <li>The spade half and the high hand are judged separately — the winning spade doesn't have to be one of the five cards in your high hand.</li>
         <li>Whoever's showing the best hand acts first each betting round, same as Hesitation.</li>
         <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
       </ul>
@@ -937,7 +985,8 @@
         <li><b>Identical to Little Chicago, with one change.</b> No declare and no low hand — the pot splits automatically between the best 5-card high hand and whoever holds the lowest spade among their hole cards (the two starting down cards, plus the seventh and final down card). Up cards never count.</li>
         <li><b>The Ace is still the highest spade</b>, which makes the 2 of Spades the best card to hold in the hole for this side of the pot.</li>
         <li>If one player wins both halves, they scoop the whole pot. If nobody has any spade in the hole at all, the high hand takes the entire pot instead.</li>
-        <li><b>The joker.</b> Plays as an ace, or as any card that completes a straight or a flush, for the high hand. In the hole it counts as the best spade possible for the hole-card side of the pot — the lowest spade (below the 2♠) in Moriah.</li>
+        <li><b>The joker.</b> Plays as an ace, or as any card that completes a straight or a flush, for the high hand. It is never a spade, so it can't be the low spade for the hole-card side of the pot.</li>
+        <li>The spade half and the high hand are judged separately — the winning spade doesn't have to be one of the five cards in your high hand.</li>
         <li>Whoever's showing the best hand acts first each betting round, same as Hesitation.</li>
         <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
       </ul>
@@ -1002,6 +1051,7 @@
     <div>
       <ul>
         <li>Three cards down to everybody (Texas Hold’em deals two), then a betting round.</li>
+        <li><b>Turn one up.</b> After that first bet, everybody turns one of their three cards face up, in turn, left of the dealer. A face-up card is still part of your hand.</li>
         <li>The flop: three community cards, then a betting round.</li>
         <li>The turn: one more community card, then a betting round.</li>
         <li>The river: one more community card (five total), then a final betting round.</li>
@@ -1011,7 +1061,7 @@
         <li><b>Playing the board.</b> If the best hand on a side is just the board, everyone who plays it ties and splits that half, like any other tie.</li>
         <li><b>Low hands.</b> By default any five cards can be a low: a hand with no pair beats one pair, which beats two pair, and so on, and lower cards win within each. If you set a limit on the main menu (9, 8 or 7 or better), a low needs five cards of different rank, no pairs, all at or under that limit. If nobody has a low that counts, high takes the whole pot.</li>
         <li><b>The joker.</b> Plays as an ace, or as any card that completes a straight or a flush, for high. For low, it can stand in as any rank ace through 8, whichever helps most — never higher, even under "any low qualifies".</li>
-        <li>Action starts left of the dealer every round — nothing's visible before showdown, so there's no "best hand acts first" the way Hesitation plays it.</li>
+        <li>Action starts left of the dealer every round, same as the other community games.</li>
         <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
       </ul>
     </div>
@@ -1039,6 +1089,20 @@
     <div>
       <ul>
         <li>Dealt and bet exactly like 7 Card Stud: two cards down, a bet, then four cards up one at a time with a bet after each, and a seventh card down with a final bet.</li>
+        <li><b>No declare.</b> Everybody is playing high. Your hand is the best five of your seven cards.</li>
+        <li><b>Two winners.</b> The two best hands share the pot, half each; an odd dollar goes to the Rich Pot for the next hand. If two hands tie for second, they split the second half; if two or more tie for best, they split the whole pot. There is no high/low split.</li>
+        <li><b>High hands.</b> Normal poker high hands, best five of seven. The joker plays as an ace, or as any card that completes a straight or a flush.</li>
+        <li>Each round after the first, the player showing the best high hand opens the betting, same as 7 Card Stud Hi/Lo.</li>
+        <li>Bust out and you can buy back in for $20 or $40 and keep playing.</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="rules" id="rules-doublestufforeo" style="display:none"><summary>How Double Stuff Oreo is played</summary>
+    <div>
+      <ul>
+        <li>Exactly like Double Stuff: two cards down, a bet, then four cards up one at a time with a bet after each, and a seventh card down.</li>
+        <li><b>The buy.</b> After the seventh card and before the final bet, each player still in, in turn, may pay $4 to trade one of their seven cards for a new one. The new card is dealt the way the old one was: trade an up card, get an up card; trade a down card, get a down card. A player with less than $4 is not offered it.</li>
         <li><b>No declare.</b> Everybody is playing high. Your hand is the best five of your seven cards.</li>
         <li><b>Two winners.</b> The two best hands share the pot, half each; an odd dollar goes to the Rich Pot for the next hand. If two hands tie for second, they split the second half; if two or more tie for best, they split the whole pot. There is no high/low split.</li>
         <li><b>High hands.</b> Normal poker high hands, best five of seven. The joker plays as an ace, or as any card that completes a straight or a flush.</li>
@@ -1493,7 +1557,7 @@ function estLow(cards, toCome){
 function estBest(cards, toCome){ return Math.max(estHigh(cards,toCome), estLow(cards,toCome)); }
 /* like estBest, but Double Stuff only counts the high side and Double Razz only the low side */
 function estSide(cards, toCome){
-  if (G.game==="doublestuff") return estHigh(cards,toCome);
+  if (G.game==="doublestuff" || G.game==="doublestufforeo") return estHigh(cards,toCome);
   if (G.game==="doublerazz") return estLow(cards,toCome);
   return estBest(cards,toCome);
 }
@@ -1683,6 +1747,7 @@ const HOLE_USE_RANGE = {
   insane: {min:2, max:4},
   omaha: {min:2, max:2},
   omaha5: {min:2, max:2},
+  omaha3: {min:1, max:2},   /* 3 Card Omaha: three hole cards, use 1 or 2 */
   little: {min:1, max:2},
   bigjohnson: {min:2, max:3},
   giant: {min:3, max:4},
@@ -1728,18 +1793,17 @@ function waterNote(){
   return CFG.oilInWater ? "Oil in the Water" : "Blood in the Water";   /* never both on at once */
 }
 function isStudFamily(game){
-  return game==="studhilo" || game==="studroll" || game==="polish" || isDoubleGame(game) || isChicagoFamily(game);
+  return game==="studhilo" || game==="studroll" || game==="stud6" || game==="polish" || isDoubleGame(game) || isChicagoFamily(game);
 }
 /* Little Chicago and Moriah: no declare at all -- the pot always splits
    between the best high hand and whoever holds the best spade in the hole
-   (highest for Chicago, lowest for Moriah). A joker in the hole counts as the
-   best spade possible for that game (above the A of spades in Chicago, below
-   the 2 of spades in Moriah). If nobody has a spade in the hole,
+   (highest for Chicago, lowest for Moriah). The joker never counts as a spade, so it can't win that half. The spade and the
+   high hand are judged separately: the spade need not be one of the five cards that make the high hand. If nobody has a spade in the hole,
    high just takes the whole thing. */
 /* Double Stuff / Double Razz: dealt and bet exactly like 7 Card Stud, but no declare -- everybody plays high
    (Double Stuff) or low (Double Razz) -- and the TWO best hands share the pot instead of a high/low split. */
 function isDoubleGame(game){
-  return game==="doublestuff" || game==="doublerazz";
+  return game==="doublestuff" || game==="doublestufforeo" || game==="doublerazz";
 }
 function isChicagoFamily(game){
   return game==="chicago" || game==="moriah";
@@ -1747,8 +1811,8 @@ function isChicagoFamily(game){
 /* The best face-down card of one suit in a player's hand: the highest (wantHighest) or lowest of that suit. A Joker in
    the hole counts as the best card of any suit; so does a wild-rank card in a custom game. Face-up cards never count,
    and in community games every card in hand is face down. Returns null when the player has none. */
-function bestHoleSuit(p, suit, wantHighest){
-  const found = p.cards.filter(c=>!c.up && ((c.joker && !JOKER_DEAD) || isWildRank(c) || (!c.joker && c.s===suit)))
+function bestHoleSuit(p, suit, wantHighest, noJoker){
+  const found = p.cards.filter(c=>!c.up && ((c.joker && !JOKER_DEAD && !noJoker) || isWildRank(c) || (!c.joker && c.s===suit)))
     .map(c=> c.joker ? {joker:true, s:suit, r: wantHighest ? 15 : 1}
            : isWildRank(c) ? {wildSpade:true, orig:c, origR:c.r, origS:c.s, s:suit, r: wantHighest ? 15 : 1} : c);
   if (!found.length) return null;
@@ -1756,7 +1820,8 @@ function bestHoleSuit(p, suit, wantHighest){
   found.forEach(c=>{ if (wantHighest ? c.r>best.r : c.r<best.r) best=c; });
   return best;
 }
-function bestHoleSpade(p, wantHighest){ return bestHoleSuit(p, "s", wantHighest); }
+/* Little Chicago / Moriah: the joker is NOT a spade -- it can never be the high spade or the low spade (it still plays in the high hand). */
+function bestHoleSpade(p, wantHighest){ return bestHoleSuit(p, "s", wantHighest, true); }
 
 /* ---- custom games: what each half of the pot goes to ----
    A half is "high" (best high hand), "low" (best qualifying low), or a suit in the hole: "hs" = highest spade face down,
@@ -1994,9 +2059,54 @@ const G = {
   pickMode:false, picked:null, pickFilter:null,
   session:0, betweenHands:false
 };
+
 /* The version number shown on the main menu and at the table. Change this one line whenever a new numbered copy is cut. */
-const APP_VERSION = "3.10";
+const APP_VERSION = "3.11";
 document.getElementById("ver-setup").textContent = document.getElementById("ver-game").textContent = "Version " + APP_VERSION;
+
+/* Your chips are saved on this device after every hand (localStorage "hilo-bankroll") so a new game can continue with them.
+   Busted (or nothing saved) = a normal $40 start. Only the human's stack is kept; the bots always start fresh. */
+const BANK_KEY = "hilo-bankroll";
+function savedBankroll(){
+  try { const v = parseInt(localStorage.getItem(BANK_KEY), 10); return v>0 ? v : 0; } catch(e){ return 0; }
+}
+/* Setting "Leaving mid-hand" (hidden Settings, remembered on this device as "hilo-bankmode"):
+   forfeit  = chips you have put in the pot are gone; the stack you hold right now is what is saved (saved as chips leave your stack, see toPot)
+   lasthand = only the stack at the end of the last finished hand is saved, so quitting mid-hand costs nothing */
+const BANK_LEAVE_DEFAULT = "forfeit";   /* "forfeit" or "lasthand": what leaving mid-hand does (the Settings row overrides it and is remembered) */
+function bankMode(){
+  const s = document.getElementById("f-bankleave");
+  const v = s ? s.value : BANK_LEAVE_DEFAULT;
+  return v==="lasthand" ? "lasthand" : v==="forfeit" ? "forfeit" : BANK_LEAVE_DEFAULT;
+}
+(function(){
+  const s = document.getElementById("f-bankleave"); if (!s) return;
+  s.value = BANK_LEAVE_DEFAULT;
+  try { const v = localStorage.getItem("hilo-bankmode"); if (v==="lasthand"||v==="forfeit") s.value = v; } catch(e){}
+  s.addEventListener("change", ()=>{ try { localStorage.setItem("hilo-bankmode", s.value); } catch(e){} });
+})();
+function saveBankroll(){
+  try {
+    const me = G.players && G.players[0];
+    if (!me || !me.human) return;
+    if (me.stack>0) localStorage.setItem(BANK_KEY, String(me.stack)); else localStorage.removeItem(BANK_KEY);
+  } catch(e){}
+}
+function refreshBankMenu(){
+  const row = document.getElementById("row-bank"), sel = document.getElementById("f-bank");
+  if (!row || !sel) return;
+  const v = savedBankroll();
+  if (v>0 && v!==40){
+    sel.innerHTML = "";
+    [["continue","Continue with $"+v],["new","New start with $40"]].forEach(o=>{ const op=document.createElement("option"); op.value=o[0]; op.textContent=o[1]; sel.appendChild(op); });
+    row.style.display = "";
+  } else { row.style.display = "none"; sel.innerHTML = ""; }
+}
+function bankChoice(){
+  const row = document.getElementById("row-bank"), sel = document.getElementById("f-bank");
+  return row && row.style.display!=="none" && sel && sel.value==="continue" ? savedBankroll() : 0;
+}
+refreshBankMenu();
 let resolver = null;
 /* ============ bot styles ============
    Each bot has a style that nudges how it plays, on top of the skill level:
@@ -2176,18 +2286,21 @@ const BLURB = {
   omaha: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody, then the flop (3), turn (1), and river (1), with a bet after each. No discard in this game \u2014 instead, once the river is out, everyone picks exactly 2 of their own cards plus exactly 3 community cards to make their best 5-card hand, then declares high, low, or both. The classic fixed split \u2014 unlike Crazy 8, there's no flexibility in how many of your own cards you use. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
   omaha5: "Identical to Omaha Hi/Lo, with one change: everybody gets 5 hole cards instead of 4. You still use exactly 2 of your own cards plus exactly 3 community cards \u2014 the extra hole card is just one more option to choose from. Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Five cards down to everybody, then the flop (3), turn (1), and river (1), with a bet after each. No discard in this game. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
   little: "Otherwise identical to Omaha Hi/Lo, with one change to the split: use 1 or 2 of your own cards, not always exactly 2. Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody, then the flop (3), turn (1), and river (1), with a bet after each. No discard in this game \u2014 instead, once the river is out, everyone picks 1 or 2 of their own cards plus the matching number of community cards (4 or 3) to make their best 5-card hand, then declares high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
+  omaha3: "Otherwise identical to Omaha Hi/Lo, with two changes: everybody gets 3 hole cards instead of 4, and you use 1 or 2 of your own cards, not always exactly 2. Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody, then the flop (3), turn (1), and river (1), with a bet after each. No discard in this game \u2014 instead, once the river is out, everyone picks 1 or 2 of their own cards plus the matching number of community cards (4 or 3) to make their best 5-card hand, then declares high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
   bigjohnson: "Otherwise identical to Omaha Hi/Lo, with one change to the split: use 2 or 3 of your own cards, not always exactly 2. Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody, then the flop (3), turn (1), and river (1), with a bet after each. No discard in this game \u2014 instead, once the river is out, everyone picks 2 or 3 of their own cards plus the matching number of community cards (3 or 2) to make their best 5-card hand, then declares high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
   giant: "Otherwise identical to Omaha Hi/Lo, with one change to the split: use 3 or 4 of your own cards, not always exactly 2. Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody, then the flop (3), turn (1), and river (1), with a bet after each. No discard in this game \u2014 instead, once the river is out, everyone picks 3 or 4 of their own cards plus the matching number of community cards (2 or 1) to make their best 5-card hand, then declares high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
   ultimate: "Otherwise identical to Omaha Hi/Lo, with one change to the split: use exactly 3 of your own cards, not 2. Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody, then the flop (3), turn (1), and river (1), with a bet after each. No discard in this game \u2014 instead, once the river is out, everyone picks exactly 3 of their own cards plus exactly 2 community cards to make their best 5-card hand, then declares high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
   studhilo: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Two hole cards down to start, then a bet after every card from there \u2014 four cards dealt face up one at a time, then a seventh and final card face down, seven cards in all. Best 5-card hand out of your 7 wins. No discard, no community cards, just your own hand growing card by card. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
+  stud6: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. One card down to start, then a bet. Then four cards dealt face up one at a time with a bet after each. Right after the fifth card, before its bet, you may pay $4 to trade one of your cards for a new one, then everybody bets. The sixth and final card comes face down, then a last bet. Best 5-card hand out of your 6 wins, high and low, with a declare. No discard, no community cards. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
   studroll: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Two hole cards down to start, then a bet. From there, every new card comes down first \u2014 and you choose which of your own down cards to flip face up, one at a time, until you're down to 2 hidden and 4 exposed. A seventh and final card comes down and stays down. Best 5-card hand out of your 7 wins. You control your own information here more than any other game in the list \u2014 what you show and when is entirely up to you. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. If you set a limit on the main menu (9, 8 or 7 or better), a low needs 5 different ranks, no pairs, all at or under that limit \u2014 or it's out of the low entirely. Anyone who busts, you included, can buy back in for $20 or $40.",
   chicago: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Dealt and bet exactly like 7 Card Stud Hi/Lo \u2014 two down, a bet, four more one at a time face up with a bet after each, a seventh and final card face down, one more bet, then showdown. There's no low hand in this game at all. Instead, the pot always splits between the best 5-card high hand and whoever holds the highest spade among their own hole cards \u2014 the Ace of Spades is the best. If nobody has a spade in the hole, high takes the whole pot. Anyone who busts, you included, can buy back in for $20 or $40.",
   moriah: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Dealt and bet exactly like 7 Card Stud Hi/Lo \u2014 two down, a bet, four more one at a time face up with a bet after each, a seventh and final card face down, one more bet, then showdown. Identical to Little Chicago, except the pot splits between the best 5-card high hand and whoever holds the LOWEST spade among their own hole cards \u2014 the Ace is still the highest spade, so the 2 of Spades is the best card for this side of the pot. If nobody has a spade in the hole, high takes the whole pot. Anyone who busts, you included, can buy back in for $20 or $40.",
   aruba: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody and a bet, then the flop. Right after the flop everybody discards one card face down and bets again. Then the turn, another discard down to two cards, and a bet. Then the river and a final bet. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   bermuda: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody, and before any betting everybody discards one card face down, then bets. Then the flop, another discard down to two cards, and a bet. Then the turn and river, with a bet after each. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   caribbean: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Four cards down to everybody and a bet, then the flop. Right after the flop everybody discards two cards face down, keeping two, and bets again. Then the turn and river, with a bet after each. At the end use 0, 1 or 2 of your two cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
-  polishholdem: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody and a bet, then the flop and a bet, the turn and a bet, the river and a final bet \u2014 just like Texas Hold\u2019em, but with three hole cards instead of two. At the end use 0, 1 or 2 of your three cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
+  polishholdem: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody and a bet, then everybody turns one of their three cards face up, then the flop and a bet, the turn and a bet, the river and a final bet \u2014 just like Texas Hold\u2019em, but with three hole cards instead of two. At the end use 0, 1 or 2 of your three cards plus the board to make your best 5-card hand, then declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
   polish: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Three cards down to everybody, then a bet. Then a fourth card down and you flip one of your four face up, and a bet. Same again with the fifth card and the sixth, so you finish with six cards, three up and three down. Then each player still in may pay $4 to trade one of their cards for a new one (a face-up card is replaced face up, a face-down card face down), followed by a final bet. Your hand is the best five of your six cards, and you declare high, low, or both. By default any five cards can be a low, with a pair ranking worse than a hand with no pair. Anyone who busts, you included, can buy back in for $20 or $40.",
+  doublestufforeo: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Exactly like Double Stuff \u2014 two down, four up one at a time and a seventh down, no declare, everybody plays high, and the two best hands split the pot \u2014 except that after the seventh card, before the final bet, each player still in may pay $4 to trade one of their seven cards for a new one.",
   doublestuff: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Dealt and bet like 7 Card Stud: two down, then four up one at a time and a seventh down, with a bet after each. No declare \u2014 everybody plays high, best five of seven, and the two best hands split the pot.",
   doublerazz: "Starting stack is $40. Bets are $1\u2013$4 with up to three raises. No antes, no blinds. Check and you can only call, never raise. Dealt and bet like 7 Card Stud: two down, then four up one at a time and a seventh down, with a bet after each. No declare \u2014 everybody plays low, best five of seven, no qualifier, and the two lowest hands split the pot.",
   random: "Deal the first hand and one of the games above gets picked for you. The table, players, and stacks stay the same all session \u2014 but every time you click Next hand, a new game is chosen again, so the game itself can change hand to hand. Any game added to the list later joins the rotation automatically. Random has no low qualifier: any five cards can be a low (a pair just ranks worse), except in Crazy 8, which is always 8-or-better. The Blood in the water setting carries across the whole session and only applies on hands where the game has a river."
@@ -2200,9 +2313,11 @@ const TAG = {
   omaha: "The classic split \u2014 always exactly 2 of your own cards plus 3 from the board. Set your own low qualifier below.",
   omaha5: "Same classic 2-plus-3 split as Omaha Hi/Lo, but with 5 hole cards to choose your 2 from instead of 4.",
   little: "Use 1 or 2 of your own cards, not always 2. Set your own low qualifier below.",
+  omaha3: "Omaha with three hole cards, and you use 1 or 2 of them (not always 2). Set your own low qualifier below.",
   bigjohnson: "Use 2 or 3 of your own cards, not always 2. Set your own low qualifier below.",
   giant: "Use 3 or 4 of your own cards, not always 2. Set your own low qualifier below.",
   ultimate: "Always exactly 3 of your own cards plus 2 from the board. Set your own low qualifier below.",
+  stud6: "Six-card stud, high/low \u2014 1 down, 4 up one at a time, a $4 trade after the fifth card, then 1 down to finish. Best 5 of 6 wins. Set your own low qualifier below.",
   studhilo: "Classic seven-card stud, high/low \u2014 2 down, 4 up one at a time, 1 down to finish. Best 5 of 7 wins. Set your own low qualifier below.",
   studroll: "Same seven cards as Stud Hi/Lo, but you choose which of your own down cards to reveal each street \u2014 hence the name. Set your own low qualifier below.",
   chicago: "No low hand here \u2014 the pot splits between the best high hand and the highest spade in your hole cards. Dealt just like 7 Card Stud.",
@@ -2210,8 +2325,9 @@ const TAG = {
   aruba: "Four cards down, then discard one after the flop and one after the turn. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
   bermuda: "Four cards down, discard one before the first bet and one after the flop. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
   caribbean: "Four cards down, then discard two after the flop. Use 0, 1 or 2 of your last two cards. Set your own low qualifier below.",
-  polishholdem: "Three cards down, then flop, turn and river like Texas Hold\u2019em. Use 0, 1 or 2 of your three cards. Set your own low qualifier below.",
+  polishholdem: "Three cards down, a bet, turn one face up, then flop, turn and river like Texas Hold\u2019em. Use 0, 1 or 2 of your three cards. Set your own low qualifier below.",
   polish: "Three down, then a card at a time \u2014 flip one up each round until you hold six, three up and three down. Pay $4 to trade one card for a new one. Set your own low qualifier below.",
+  doublestufforeo: "Double Stuff with a $4 buy: after the seventh card, before the final bet, you may pay $4 to trade one of your cards for a new one. Two best hands split the pot.",
   doublestuff: "7 Card Stud with no declare \u2014 everybody plays high, and the two best hands split the pot.",
   doublerazz: "7 Card Stud with no declare \u2014 everybody plays low, and the two lowest hands split the pot.",
   random: "A different game every hand \u2014 same table, same stacks, whatever's in the list above."
@@ -2219,18 +2335,18 @@ const TAG = {
 /* One shared place to name every game, used by the setup screen, the table
    header, the rules panel, and random mode's hand-to-hand announcement --
    so a future game only needs adding here once, not in each of those spots. */
-const GAME_TITLES = { hesitation:"Hesitation", crazy8:"Crazy 8", crazy:"Crazy", insane:"Insane", omaha:"Omaha Hi/Lo", omaha5:"5 Card Omaha Hi/Lo", little:"Little Omaha Hi/Lo", bigjohnson:"Big Johnson Omaha Hi/Lo", giant:"Giant Omaha Hi/Lo", ultimate:"Ultimate Omaha Hi/Lo", studhilo:"7 Card Stud Hi/Lo", studroll:"7 Card Stud Roll Your Own Hi/Lo", chicago:"Little Chicago", moriah:"Moriah", aruba:"Aruba", bermuda:"Bermuda", caribbean:"Caribbean", polish:"Polish Poker", polishholdem:"Polish Holdem", doublestuff:"Double Stuff", doublerazz:"Double Razz", random:"Random" };
+const GAME_TITLES = { hesitation:"Hesitation", crazy8:"Crazy 8", crazy:"Crazy", insane:"Insane", omaha:"Omaha Hi/Lo", omaha5:"5 Card Omaha Hi/Lo", omaha3:"3 Card Omaha Hi/Lo", little:"Little Omaha Hi/Lo", bigjohnson:"Big Johnson Omaha Hi/Lo", giant:"Giant Omaha Hi/Lo", ultimate:"Ultimate Omaha Hi/Lo", studhilo:"7 Card Stud Hi/Lo", studroll:"7 Card Stud Roll Your Own Hi/Lo", stud6:"6 Card Stud Hi/Lo", chicago:"Little Chicago", moriah:"Moriah", aruba:"Aruba", bermuda:"Bermuda", caribbean:"Caribbean", polish:"Polish Poker", polishholdem:"Polish Holdem", doublestufforeo:"Double Stuff Oreo", doublestuff:"Double Stuff", doublerazz:"Double Razz", random:"Random" };
 /* the quick-reference line shown under the table title: how many of your own cards a hand may use (the Omaha family),
    "Best 5 for Hi or Lo" (the stud games), or what each half of the pot goes to (Little Chicago, Moriah). Hesitation has none. */
 const TABLE_SUBTITLE = {
   crazy8:"Use 1, 2 or 3", crazy:"Use 1, 2 or 3", insane:"Use 2, 3 or 4",
   omaha:"Use 2", omaha5:"Use 2",
-  little:"Use 1 or 2", bigjohnson:"Use 2 or 3", giant:"Use 3 or 4", ultimate:"Use 3",
-  studhilo:"Best 5 for Hi or Lo", studroll:"Best 5 for Hi or Lo",
+  omaha3:"Use 1 or 2", little:"Use 1 or 2", bigjohnson:"Use 2 or 3", giant:"Use 3 or 4", ultimate:"Use 3",
+  studhilo:"Best 5 for Hi or Lo", studroll:"Best 5 for Hi or Lo", stud6:"Best 5 for Hi or Lo",
   chicago:"High Spade, High Hand", moriah:"Low Spade, High Hand",
   aruba:"Use 0, 1 or 2", bermuda:"Use 0, 1 or 2", caribbean:"Use 0, 1 or 2",
   polish:"Best 5 for Hi or Lo", polishholdem:"Use 0, 1 or 2",
-  doublestuff:"Best 5 for High \u2014 top two split", doublerazz:"Best 5 for Low \u2014 two lowest split"
+  doublestuff:"Best 5 for High \u2014 top two split", doublestufforeo:"Best 5 for High \u2014 top two split, $4 buy", doublerazz:"Best 5 for Low \u2014 two lowest split"
 };
 /* Everything eligible for "Random" comes straight from this dropdown's own
    options, minus Random itself -- so any game added to the menu later joins
@@ -2284,7 +2400,7 @@ function updateSetupForGame(){
   } else if (CUSTOM_DEFS[game]){
     $("row-lowqual").style.display = customUsesLow(CUSTOM_DEFS[game]) ? "flex" : "none";
     $("f-low").value = CUSTOM_DEFS[game].low==="any" ? "any" : String(CUSTOM_DEFS[game].low);
-  } else if (game==="omaha" || game==="omaha5" || game==="little" || game==="bigjohnson" || game==="giant" || game==="ultimate" || game==="aruba" || game==="bermuda" || game==="caribbean" || game==="polish" || game==="polishholdem" || game==="studhilo" || game==="studroll"){
+  } else if (game==="omaha" || game==="omaha5" || game==="omaha3" || game==="little" || game==="bigjohnson" || game==="giant" || game==="ultimate" || game==="aruba" || game==="bermuda" || game==="caribbean" || game==="polish" || game==="polishholdem" || game==="studhilo" || game==="studroll" || game==="stud6"){
     $("row-lowqual").style.display = "flex";
     $("f-low").value = "any";
   } else {
@@ -2313,6 +2429,7 @@ function showRulesFor(game){
   $("rules-omaha").style.display = game==="omaha" ? "" : "none";
   $("rules-omaha5").style.display = game==="omaha5" ? "" : "none";
   $("rules-little").style.display = game==="little" ? "" : "none";
+  $("rules-omaha3").style.display = game==="omaha3" ? "" : "none";
   $("rules-bigjohnson").style.display = game==="bigjohnson" ? "" : "none";
   $("rules-giant").style.display = game==="giant" ? "" : "none";
   $("rules-ultimate").style.display = game==="ultimate" ? "" : "none";
@@ -2322,9 +2439,11 @@ function showRulesFor(game){
   $("rules-polish").style.display = game==="polish" ? "" : "none";
   $("rules-polishholdem").style.display = game==="polishholdem" ? "" : "none";
   $("rules-doublestuff").style.display = game==="doublestuff" ? "" : "none";
+  $("rules-doublestufforeo").style.display = game==="doublestufforeo" ? "" : "none";
   $("rules-doublerazz").style.display = game==="doublerazz" ? "" : "none";
   $("rules-studhilo").style.display = game==="studhilo" ? "" : "none";
   $("rules-studroll").style.display = game==="studroll" ? "" : "none";
+  $("rules-stud6").style.display = game==="stud6" ? "" : "none";
   $("rules-chicago").style.display = game==="chicago" ? "" : "none";
   $("rules-moriah").style.display = game==="moriah" ? "" : "none";
   $("rules-blood").style.display = isCommunityFamily(game) ? "" : "none";
@@ -2414,10 +2533,11 @@ function leaveLandscape(){
 /* offline / install support: only when served over http(s), never when the file is opened straight from the phone */
 if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(()=>{});
 function returnToMenu(){
-  if (G.handNo>0 && !confirm("Leave this game and return to the menu? Progress this session will be lost.")) return false;
+  if (G.handNo>0 && !confirm("Leave this game and return to the menu? " + (bankMode()==="lasthand" ? "You keep your chips from the last finished hand." : "You keep the chips you hold now; chips already in the pot are forfeited."))) return false;
   endSession();
   $("game").style.display="none";
   $("setup").style.display="block";
+  refreshBankMenu();
   leaveLandscape();
   return true;
 }
@@ -2506,6 +2626,8 @@ $("btn-start").addEventListener("click", ()=>{
   CFG.skill = +$("f-skill").value;
   CFG.dealSpeed = $("f-deal").value;
   CFG.stack = 40;
+  const startBank = bankChoice();   /* 0 = normal $40 start */
+  if (!startBank) { try { localStorage.removeItem(BANK_KEY); } catch(e){} }
   if (G.randomMode){
     applyGameDefaults(G.game);
   } else {
@@ -2542,6 +2664,7 @@ $("btn-start").addEventListener("click", ()=>{
       traded:false, allIn:false, winner:false,
       selHole:[], selBoard:[], locked:false, finalHand:null, suggestHole:null });
   }
+  if (startBank) G.players[0].stack = startBank;
   G.button = Math.floor(Math.random()*CFG.players);
   G.handNo = 0; G.carry = 0; G.carryIn = 0;
   G.extraNameIdx = 0;
@@ -2569,6 +2692,7 @@ function toPot(p, amt, forBetting){
   p.stack -= amt;
   if (forBetting !== false) p.committed += amt;
   G.pot += amt;
+  if (p.human && bankMode()==="forfeit") saveBankroll();   /* chips in the pot are forfeited if you leave */
   return amt;
 }
 function log(msg, cls){
@@ -2619,7 +2743,7 @@ function chipStackEl(amount){
 /* names for the two pot stacks: every game splits the pot two ways */
 function potStackLabels(game){
   if (game==="chicago" || game==="moriah") return ["Hi","Spade"];
-  if (game==="doublestuff" || game==="doublerazz") return ["1st","2nd"];
+  if (isDoubleGame(game)) return ["1st","2nd"];
   return ["Hi","Lo"];
 }
 function renderPotChips(){
@@ -2826,7 +2950,7 @@ function render(){
     } else {
       const used = (G.showdown && p.finalHand && !p.folded && !G.handPickMode) ? usedHoleIdx(p) : null;
       p.cards.forEach((c,ci)=>{
-        const showFace = isMe || G.showdown;
+        const showFace = isMe || c.up || G.showdown;   /* a turned-up hole card (Polish Holdem) shows to everybody */
         const useCls = used ? (used.has(ci) ? " used" : " unused") : "";
         if (isMe){
           const selected = G.handPickMode && p.selHole.indexOf(ci)>=0;
@@ -3111,7 +3235,7 @@ function holeRange(){
 /* how many hole cards get dealt for each game -- 5 Card Omaha is the one
    exception to the usual 4. */
 function holeCount(game){
-  return CUSTOM_HOLE[game] || (game==="omaha5" ? 5 : game==="polishholdem" ? 3 : 4);
+  return CUSTOM_HOLE[game] || (game==="omaha5" ? 5 : (game==="polishholdem" || game==="omaha3") ? 3 : 4);
 }
 function toggleHole(i){
   const me = G.players[0];
@@ -3184,6 +3308,27 @@ function bettingOrder(firstRound){
    "allin" : the older way -- it may call all in, a side pot forms, and a bot that loses its last chip leaves and a new player sits down with $20/$40. */
 const BOT_SHORT_STACK = "topup";
 const BOT_LOW_STACK = 10, BOT_TOPUP = 40;
+/* "Do you want to chop?" -- in the games with a declare, when a fold takes the table from three players down to two and
+   you are one of the two. Yes: the pair split the pot evenly right now, no more cards, no declare. No: play on (the usual reason
+   to say no is that you both might declare the same way and one of you could take it all). Only the human is asked; a hand
+   between two bots is never chopped. The other player is marked folded until resolveCore pays the split out. */
+function chopAllowed(){ return !isChicagoFamily(G.game) && !isDoubleGame(G.game) && !halfCrit(); }
+async function offerChop(){
+  const left = active();
+  const me = left.find(p=>p.human);
+  if (left.length!==2 || !me) return false;
+  const other = left.find(p=>p!==me);
+  G.acting = me.id; render();
+  prompt("Only you and " + other.name + " are left, $" + G.pot + " in the pot. Do you want to chop?");
+  const a = await ask(()=>{ clearActions(); btn("Yes, chop the pot", "yes", "primary"); btn("No, play on", "no", "quiet"); });
+  G.acting = null;
+  if (a!=="yes"){ log("You play on."); render(); return false; }
+  G.chop = [me, other];
+  other.folded = true; other.status = "chopping";
+  log("You and " + other.name + " chop the pot \u2014 no more betting, no declare.", "hl");
+  render();
+  return true;
+}
 async function bettingRound(opts){
   opts = opts || {};
   const order = bettingOrder(opts.firstRound);
@@ -3223,7 +3368,9 @@ async function bettingRound(opts){
     p.acted = true;
     G.bloodBanner = false;
 
+    let chopAsk = false;
     if (act.a==="fold"){
+      chopAsk = active().length===3 && chopAllowed();   /* three were left and this fold makes it two */
       p.folded = true; p.status="folded";
       log(p.name + " " + sv(p,"fold") + ".");
     } else if (act.a==="check"){
@@ -3256,6 +3403,7 @@ async function bettingRound(opts){
     }
     render();
     if (!p.human) await sleep(960);
+    if (chopAsk && active().length===2) await offerChop();
     if (active().length<=1) break;
   }
   G.acting=null; G.betLevel = 0;
@@ -4495,7 +4643,7 @@ function botDeclareCrazy8(p){
 /* ========================== showdown =========================== */
 function buildPots(){
   const payers = G.players.filter(p=>p.committed>0);
-  if (!payers.length) return [];
+  if (!payers.length) return G.pot>0 ? [{ amount:G.pot, eligible:G.players.filter(p=>!p.folded && !p.out), from:0, to:0 }] : [];   /* money in the pot but nobody bet (Hesitation pass fees) still gets paid out */
   const levels = [...new Set(payers.map(p=>p.committed))].sort((a,b)=>a-b);
   let prev=0; const pots=[];
   levels.forEach(level=>{
@@ -4734,9 +4882,21 @@ function resolveChicago(contenders, potAmount, label, wantHighest){
 function resolve(){ resolveCore(); try { recordHand(); } catch(e){ console.error(e); } }
 function resolveCore(){
   G.players.forEach(p=>{ p.wonHigh=false; p.wonSpade=null; p.halfWon=[]; });   /* Little Chicago / Moriah: which half each player takes is recorded below */
+  const chopped = G.chop; G.chop = null;
+  if (chopped) chopped.forEach(p=>{ p.folded=false; });   /* the chopper that was parked as "folded" is back in */
   const contenders = active();
   const pots = buildPots();
   const total = pots.reduce((s,pt)=>s+pt.amount, 0);
+  if (chopped && contenders.length===2){
+    pots.forEach((pt,i)=>{
+      const label = pots.length===1 ? "pot" : (i===0 ? "main pot" : (pots.length===2 ? "side pot" : "side pot " + i));
+      const field = pt.eligible.length ? pt.eligible : contenders;
+      const paid = splitAmount(field, pt.amount);
+      paid.forEach(({p,got})=>{ p.stack += got; p.winner = true; p.status = "chopped $" + got; });
+      log(field.map(p=>p.name).join(" and ") + " chop the " + label + (field.length>1 ? ", $" + paid[0].got + " each." : ", $" + paid[0].got + "."), "big");
+    });
+    G.pot=0; return;
+  }
   if (contenders.length<=1){
     if (contenders.length===1){
       const w = contenders[0];
@@ -4758,7 +4918,7 @@ function resolveCore(){
 
 /* =========================== the hand ========================== */
 async function playHand(){
-  G.handLog = []; G.startStacks = G.players.map(p=>p.stack);
+  G.handLog = []; G.startStacks = G.players.map(p=>p.stack); G.chop = null;
   if (G.randomMode && G.handNo>0){
     G.game = pickRandomGame();
     CFG.game = G.game;
@@ -4781,7 +4941,7 @@ async function playHand(){
    user said he may remove later), the declare, and the showdown. The hand is the best five of six. */
 const POLISH_BUY_COST = 4;
 const POLISH_FINAL_BET = true;
-function studFinalSize(){ return G.game==="polish" ? 6 : 7; }
+function studFinalSize(){ return (G.game==="polish" || G.game==="stud6") ? 6 : 7; }
 /* A bot buys when a random replacement card, swapped in for its worst-fitting card, raises its hand's prospects by
    enough to be worth $4 of a pot that size. The new card is dealt the same way (up/down) as the card it gives up. */
 function botBuyChoice(p){
@@ -4976,14 +5136,15 @@ async function playHandStud(){
   log("\u2014 hand " + G.handNo + ", " + G.players[G.button].name + " deals \u2014", "big");
   if (G.carryIn>0) log("$" + G.carryIn + " Rich Pot", "hl");
 
-  await dealHoleCards(2, ()=>{ const c=draw(); c.up=false; return c; });
+  const six = G.game==="stud6";   /* 6 Card Stud: one down, four up (cards 2-5), a $4 buy, a bet, one down, a bet */
+  await dealHoleCards(six ? 1 : 2, ()=>{ const c=draw(); c.up=false; return c; });
   render();
-  prompt("Two down to everybody.");
+  prompt(six ? "One down to everybody." : "Two down to everybody.");
   await sleep(1400);
   await bettingRound({firstRound:true});
 
   const rollYourOwn = G.game==="studroll";
-  for (let street=3; street<=6 && active().length>1; street++){
+  for (let street=(six?2:3); street<=(six?5:6) && active().length>1; street++){
     if (buyAt(street)) await buyRound();
     if (active().length<2) break;
     await dealRoundTo(active(), ()=>{ const c=draw(); c.up = !rollYourOwn; return c; });
@@ -4998,7 +5159,8 @@ async function playHandStud(){
       prompt("Card " + street + ", up.");
       await sleep(1000);
     }
-    await bettingRound({firstRound:false});
+    if (six && street===5 && active().length>1) await buyRound();   /* 6 Card Stud: the $4 trade comes right after the fifth card, before its bet */
+    if (active().length>1) await bettingRound({firstRound:false});
   }
 
   if (active().length>1 && buyAt(7)) await buyRound();
@@ -5008,7 +5170,8 @@ async function playHandStud(){
     log("\u2014 the last card \u2014", "hl");
     prompt("Last card, down\u2014it stays that way.");
     await sleep(1000);
-    await bettingRound({firstRound:false});
+    if (G.game==="doublestufforeo" && active().length>1) await buyRound();   /* Double Stuff Oreo: $4 buy before the final bet */
+    if (active().length>1) await bettingRound({firstRound:false});
   }
 
   active().forEach(p=>{ p.finalHand = p.cards; });
@@ -5168,6 +5331,34 @@ async function dealBoard(count){
   }
 }
 
+/* Polish Holdem: after the first bet everybody turns one of their three cards face up (the flop, turn and river then go as in
+   any hold'em game). A face-up hole card is still part of your hand: you may use 0, 1 or 2 of your three cards. */
+async function holdemFlipRound(){
+  const order = seatOrderFrom((G.button+1)%G.players.length).filter(p=>!p.folded && !p.out);
+  log("\u2014 turn one card face up \u2014", "hl");
+  for (const p of order){
+    G.acting = p.id; render();
+    const all = p.cards.map((c,i)=>i);
+    let idx;
+    if (p.human){
+      G.discardMode = { need:1, sel:[] };
+      prompt("Click one of your three cards to turn it face up, then confirm.");
+      render();
+      await ask(()=>{ clearActions(); const b = btn("Turn it up", true, "primary"); b.disabled = true; });
+      idx = G.discardMode.sel[0]; G.discardMode = null;
+    } else {
+      await botPause();
+      idx = botRollChoice(p, all);
+    }
+    const c = p.cards[idx];
+    c.up = true;
+    p.status = "flipped " + cardText(c) + " up";
+    log(p.name + " " + sv(p,null,["flip","flips"]) + " " + cardText(c) + " face up.", "hl");
+    render();
+    await sleep(900);
+  }
+  G.acting = null; render();
+}
 async function playHandCrazy8(){
   G.handNo++;
   G.deck = shuffle(newDeck());
@@ -5197,6 +5388,7 @@ async function playHandCrazy8(){
   await discardRound("deal");
     if (buyAt("deal")) await buyRound();
   await bettingRound({stageName:"pre-flop"});
+  if (G.game==="polishholdem" && active().length>1) await holdemFlipRound();
 
   if (active().length>1){
     log("\u2014 the flop \u2014", "hl");
@@ -5262,6 +5454,7 @@ async function playHandCrazy8(){
 }
 
 async function handleBusts(){
+  saveBankroll();   /* chips kept for the next game; busted = nothing saved */
   if (BOT_SHORT_STACK==="topup"){
     for (const p of G.players){
       if (!p.human && !p.out && p.stack>0 && p.stack<BOT_LOW_STACK){
@@ -5316,6 +5509,7 @@ function endGame(){
   btn("New game", null, "primary").addEventListener("click", ()=>{
     $("game").style.display="none";
     $("setup").style.display="block";
+    refreshBankMenu();
     leaveLandscape();
   });
 }
